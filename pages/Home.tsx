@@ -50,19 +50,21 @@ const Home: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[1, 2, 3].map((item) => (
               <div key={item} className="group cursor-pointer">
-                <div className="relative overflow-hidden aspect-[3/4] mb-4 bg-gray-100">
-                  <img 
-                    src={`https://picsum.photos/600/800?random=${item}`} 
-                    alt="Jewelry Item" 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-                  <div className="absolute bottom-4 left-4 right-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                    <button className="w-full bg-white text-black py-3 text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
-                      Quick View
-                    </button>
-                  </div>
-                </div>
+                <Link to={`/product/${item}`}>
+                    <div className="relative overflow-hidden aspect-[3/4] mb-4 bg-gray-100">
+                    <img 
+                        src={`https://picsum.photos/600/800?random=${item}`} 
+                        alt="Jewelry Item" 
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                    <div className="absolute bottom-4 left-4 right-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                        <button className="w-full bg-white text-black py-3 text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
+                        Quick View
+                        </button>
+                    </div>
+                    </div>
+                </Link>
                 <div className="text-center space-y-1">
                   <h4 className="text-lg font-serif">Silver Moon Pendant</h4>
                   <p className="text-gray-500 font-light">$129.00</p>
@@ -107,7 +109,8 @@ const Home: React.FC = () => {
             <nav className="flex flex-wrap justify-center gap-8 text-sm text-gray-400 uppercase tracking-widest">
               <Link to="/" className="hover:text-white transition-colors">Home</Link>
               <Link to="/shop" className="hover:text-white transition-colors">Shop</Link>
-              <Link to="/admin" className="hover:text-white transition-colors">Admin</Link>
+              <Link to="/about" className="hover:text-white transition-colors">About</Link>
+              <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
             </nav>
             <p className="text-xs text-gray-600 pt-8">© 2024 Its27 Jewelry. All rights reserved.</p>
          </div>

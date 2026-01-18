@@ -41,14 +41,14 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick, cartCount = 0 }) => {
              <button className="p-2 hover:bg-gray-50 rounded-full transition-colors hidden sm:block">
               <Search className="w-5 h-5 stroke-black" />
             </button>
-            <button className="p-2 hover:bg-gray-50 rounded-full transition-colors relative">
+            <Link to="/cart" className="p-2 hover:bg-gray-50 rounded-full transition-colors relative">
               <ShoppingBag className="w-6 h-6 stroke-black" />
               {cartCount > 0 && (
                 <span className="absolute top-1 right-1 bg-black text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full">
                   {cartCount}
                 </span>
               )}
-            </button>
+            </Link>
           </div>
         </div>
       </div>
