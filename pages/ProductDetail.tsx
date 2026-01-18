@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Star, Truck, ShieldCheck, ArrowRight } from 'lucide-react';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams();
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 md:py-20 animate-fade-in-up">
@@ -44,25 +43,6 @@ const ProductDetail: React.FC = () => {
            <p className="text-gray-600 leading-relaxed font-light text-lg">
              Handcrafted with precision, this piece embodies the essence of Its27. Made from 100% recycled sterling silver, it features a unique texture that catches the light beautifully. Perfect for everyday wear or special occasions.
            </p>
-
-           <div className="space-y-4 pt-4">
-              <label className="block text-xs uppercase tracking-widest text-gray-500">Select Size</label>
-              <div className="flex flex-wrap gap-3">
-                {['5', '6', '7', '8', '9', '10'].map(size => (
-                  <button 
-                    key={size} 
-                    onClick={() => setSelectedSize(size)}
-                    className={`w-12 h-12 border flex items-center justify-center transition-all duration-300 ${
-                        selectedSize === size 
-                        ? 'border-black bg-black text-white' 
-                        : 'border-gray-200 hover:border-black text-gray-600'
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-           </div>
 
            <div className="pt-6 space-y-4">
                 <button className="w-full bg-black text-white py-4 uppercase tracking-[0.2em] hover:bg-gray-800 transition-colors flex items-center justify-center gap-3">

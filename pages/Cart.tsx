@@ -19,7 +19,6 @@ const Cart: React.FC = () => {
                    <div className="flex justify-between items-start">
                       <div className="space-y-1">
                         <Link to={`/product/${item}`} className="font-serif text-lg hover:underline">Minimalist Band</Link>
-                        <p className="text-xs text-gray-500 uppercase tracking-wide">Size: 7</p>
                       </div>
                       <p className="font-light">$85.00</p>
                    </div>
