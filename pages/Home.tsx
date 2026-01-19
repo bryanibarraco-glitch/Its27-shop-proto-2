@@ -1,8 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star } from 'lucide-react';
+import { PRODUCTS } from '../data/products';
 
 const Home: React.FC = () => {
+  // Use first 3 products for preview
+  const featuredProducts = PRODUCTS.slice(0, 3);
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -48,13 +52,13 @@ const Home: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[1, 2, 3].map((item) => (
-              <div key={item} className="group cursor-pointer">
-                <Link to={`/product/${item}`}>
+            {featuredProducts.map((product) => (
+              <div key={product.id} className="group cursor-pointer">
+                <Link to={`/product/${product.id}`}>
                     <div className="relative overflow-hidden aspect-[3/4] mb-4 bg-gray-100">
                     <img 
-                        src={`https://picsum.photos/600/800?random=${item}`} 
-                        alt="Jewelry Item" 
+                        src={`https://picsum.photos/600/800?random=${product.imageId}`} 
+                        alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
@@ -66,8 +70,10 @@ const Home: React.FC = () => {
                     </div>
                 </Link>
                 <div className="text-center space-y-1">
-                  <h4 className="text-lg font-serif">Silver Moon Pendant</h4>
-                  <p className="text-gray-500 font-light">$129.00</p>
+                  <h4 className="text-lg font-serif">{product.name}</h4>
+                  <p className="text-gray-500 font-light">
+                    {product.price.toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 })}
+                  </p>
                 </div>
               </div>
             ))}

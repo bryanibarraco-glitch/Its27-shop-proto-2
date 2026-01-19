@@ -1,13 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, ShoppingBag, Search } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
 interface NavbarProps {
   onMenuClick: () => void;
-  cartCount?: number;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onMenuClick, cartCount = 0 }) => {
+const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
+  const { cartCount } = useCart();
+
   return (
     <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -44,7 +46,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick, cartCount = 0 }) => {
             <Link to="/cart" className="p-2 hover:bg-gray-50 rounded-full transition-colors relative">
               <ShoppingBag className="w-6 h-6 stroke-black" />
               {cartCount > 0 && (
-                <span className="absolute top-1 right-1 bg-black text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full">
+                <span className="absolute top-1 right-1 bg-black text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full animate-fade-in">
                   {cartCount}
                 </span>
               )}

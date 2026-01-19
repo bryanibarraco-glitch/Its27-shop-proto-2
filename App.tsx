@@ -10,9 +10,11 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
 import { NavLink } from './types';
+import { CartProvider } from './context/CartContext';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -52,10 +54,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-white text-black selection:bg-black selection:text-white">
       {/* Navigation Layer */}
-      <Navbar 
-        onMenuClick={toggleSidebar} 
-        cartCount={2} // Placeholder cart count
-      />
+      <Navbar onMenuClick={toggleSidebar} />
 
       <Sidebar 
         isOpen={isSidebarOpen} 
@@ -73,11 +72,20 @@ const App: React.FC = () => {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>
       </main>
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <CartProvider>
+      <AppContent />
+    </CartProvider>
   );
 };
 

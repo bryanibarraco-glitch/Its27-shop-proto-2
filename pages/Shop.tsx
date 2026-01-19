@@ -1,22 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ChevronDown, SlidersHorizontal, X } from 'lucide-react';
-
-// Mock Data
-const PRODUCTS = [
-  { id: 1, name: 'Minimalist Silver Band', category: 'Ring', price: 85.00, imageId: 101 },
-  { id: 2, name: 'Eclipse Pearl Necklace', category: 'Necklace', price: 145.00, imageId: 102 },
-  { id: 3, name: 'Geometric Gold Studs', category: 'Earrings', price: 55.00, imageId: 103 },
-  { id: 4, name: 'Obsidian Signet Ring', category: 'Ring', price: 120.00, imageId: 104 },
-  { id: 5, name: 'Midnight Bridal Set', category: 'Set', price: 450.00, imageId: 105 },
-  { id: 6, name: 'Nova Drop Earrings', category: 'Earrings', price: 95.00, imageId: 106 },
-  { id: 7, name: 'Horizon Chain', category: 'Necklace', price: 110.00, imageId: 107 },
-  { id: 8, name: 'Classic Gold Band', category: 'Ring', price: 210.00, imageId: 108 },
-  { id: 9, name: 'Starlight Pendant', category: 'Necklace', price: 135.00, imageId: 109 },
-  { id: 10, name: 'Onyx Studs', category: 'Earrings', price: 65.00, imageId: 110 },
-  { id: 11, name: 'Duo Tone Set', category: 'Set', price: 280.00, imageId: 111 },
-  { id: 12, name: 'Wave Ring', category: 'Ring', price: 75.00, imageId: 112 },
-];
+import { PRODUCTS } from '../data/products';
 
 const CATEGORIES = ['All', 'Necklace', 'Ring', 'Earrings', 'Set'];
 
@@ -171,7 +156,9 @@ const Shop: React.FC = () => {
                     <Link to={`/product/${product.id}`} className="block text-sm font-bold uppercase tracking-wide hover:underline truncate px-2">
                         {product.name}
                     </Link>
-                    <p className="text-gray-500 text-sm mt-1">${product.price.toFixed(2)}</p>
+                    <p className="text-gray-500 text-sm mt-1">
+                      {product.price.toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 })}
+                    </p>
                 </div>
                 </div>
             ))}
