@@ -10,6 +10,7 @@ const ProductDetail: React.FC = () => {
   const { addToCart } = useCart();
   const [product, setProduct] = useState<Product | undefined>(undefined);
   const [loading, setLoading] = useState(true);
+  const [activeImage, setActiveImage] = useState<string>('');
   
   useEffect(() => {
     async function fetchProduct() {
@@ -23,10 +24,17 @@ const ProductDetail: React.FC = () => {
         
         if (error) throw error;
         setProduct(data);
+        if (data.images && data.images.length > 0) {
+            setActiveImage(data.images[0]);
+        } else {
+            setActiveImage(`https://picsum.photos/800/1000?random=${data.imageId}`);
+        }
       } catch (err) {
         console.error("Failed to fetch product, using fallback", err);
         // Fallback to static data
-        setProduct(PRODUCTS.find(p => p.id === Number(id)));
+        const staticProd = PRODUCTS.find(p => p.id === Number(id));
+        setProduct(staticProd);
+        if (staticProd) setActiveImage(`https://picsum.photos/800/1000?random=${staticProd.imageId}`);
       } finally {
         setLoading(false);
       }
@@ -53,6 +61,16 @@ const ProductDetail: React.FC = () => {
     );
   }
 
+  // Determine images array
+  const hasMultipleImages = product.images && product.images.length > 0;
+  const images = hasMultipleImages 
+    ? product.images 
+    : [
+        `https://picsum.photos/800/1000?random=${product.imageId}`,
+        `https://picsum.photos/400/400?random=${product.imageId + 100}`,
+        `https://picsum.photos/400/400?random=${product.imageId + 200}`
+      ];
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 md:py-20 animate-fade-in-up">
       <div className="mb-8">
@@ -65,17 +83,29 @@ const ProductDetail: React.FC = () => {
         
         {/* Product Image Gallery */}
         <div className="space-y-4">
+            {/* Main Image */}
             <div className="bg-gray-50 aspect-[3/4] overflow-hidden relative">
                 <img 
-                    src={`https://picsum.photos/800/1000?random=${product.imageId}`} 
+                    src={activeImage} 
                     alt={product.name}
-                    className="w-full h-full object-cover" 
+                    className="w-full h-full object-cover transition-opacity duration-300" 
                 />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-                 <img src={`https://picsum.photos/400/400?random=${product.imageId + 100}`} className="aspect-square object-cover bg-gray-50 cursor-pointer hover:opacity-80 transition-opacity" alt="Detail 1" />
-                 <img src={`https://picsum.photos/400/400?random=${product.imageId + 200}`} className="aspect-square object-cover bg-gray-50 cursor-pointer hover:opacity-80 transition-opacity" alt="Detail 2" />
-            </div>
+            
+            {/* Thumbnails */}
+            {images && images.length > 1 && (
+                <div className="grid grid-cols-4 gap-4">
+                    {images.map((img, idx) => (
+                        <div 
+                            key={idx} 
+                            onClick={() => setActiveImage(img!)}
+                            className={`aspect-square overflow-hidden cursor-pointer border-2 transition-all ${activeImage === img ? 'border-black opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                        >
+                            <img src={img} className="w-full h-full object-cover" alt={`Detail ${idx + 1}`} />
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
 
         {/* Product Info */}

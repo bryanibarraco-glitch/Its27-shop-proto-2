@@ -3,7 +3,8 @@ export interface Product {
   name: string;
   category: string;
   price: number;
-  imageId: number;
+  imageId: number; // Kept for backward compatibility with existing data
+  images?: string[]; // New field for real images
   description?: string;
 }
 

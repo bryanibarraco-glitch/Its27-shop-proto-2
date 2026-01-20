@@ -168,31 +168,37 @@ const Shop: React.FC = () => {
         </div>
       ) : filteredProducts.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
-            {filteredProducts.map((product) => (
-                <div key={product.id} className="space-y-3 group cursor-pointer">
-                <Link to={`/product/${product.id}`} className="block aspect-[4/5] bg-gray-100 relative overflow-hidden">
-                    <img 
-                        src={`https://picsum.photos/400/500?random=${product.imageId}`} 
-                        alt={product.name} 
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300"></div>
-                    <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                        <button className="w-full bg-white text-black py-2 text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
-                            View Details
-                        </button>
-                    </div>
-                </Link>
-                <div className="text-center">
-                    <Link to={`/product/${product.id}`} className="block text-sm font-bold uppercase tracking-wide hover:underline truncate px-2">
-                        {product.name}
+            {filteredProducts.map((product) => {
+                const displayImage = product.images && product.images.length > 0 
+                    ? product.images[0] 
+                    : `https://picsum.photos/400/500?random=${product.imageId}`;
+
+                return (
+                    <div key={product.id} className="space-y-3 group cursor-pointer">
+                    <Link to={`/product/${product.id}`} className="block aspect-[4/5] bg-gray-100 relative overflow-hidden">
+                        <img 
+                            src={displayImage} 
+                            alt={product.name} 
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300"></div>
+                        <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                            <button className="w-full bg-white text-black py-2 text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
+                                View Details
+                            </button>
+                        </div>
                     </Link>
-                    <p className="text-gray-500 text-sm mt-1">
-                      {product.price.toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 })}
-                    </p>
-                </div>
-                </div>
-            ))}
+                    <div className="text-center">
+                        <Link to={`/product/${product.id}`} className="block text-sm font-bold uppercase tracking-wide hover:underline truncate px-2">
+                            {product.name}
+                        </Link>
+                        <p className="text-gray-500 text-sm mt-1">
+                        {product.price.toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 })}
+                        </p>
+                    </div>
+                    </div>
+                );
+            })}
         </div>
       ) : (
           <div className="text-center py-20">

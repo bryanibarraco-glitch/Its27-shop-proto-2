@@ -25,32 +25,38 @@ const Cart: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-8">
-           {cartItems.map((item, index) => (
-             <div key={`${item.id}-${index}`} className="flex gap-6 py-6 border-b border-gray-100 animate-fade-in-up">
-                <Link to={`/product/${item.id}`} className="w-24 h-32 bg-gray-50 flex-shrink-0 overflow-hidden">
-                  <img src={`https://picsum.photos/200/300?random=${item.imageId}`} alt={item.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
-                </Link>
-                <div className="flex-1 flex flex-col justify-between">
-                   <div className="flex justify-between items-start">
-                      <div className="space-y-1">
-                        <Link to={`/product/${item.id}`} className="font-serif text-lg hover:underline">{item.name}</Link>
-                        {item.quantity > 1 && (
-                             <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
-                        )}
-                      </div>
-                      <p className="font-light">
-                        {(item.price * item.quantity).toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 })}
-                      </p>
-                   </div>
-                   <button 
-                    onClick={() => removeFromCart(item.id)}
-                    className="text-gray-400 hover:text-black transition-colors self-start flex items-center gap-2 text-[10px] uppercase tracking-widest"
-                   >
-                     <Trash2 className="w-4 h-4" /> Remove
-                   </button>
-                </div>
-             </div>
-           ))}
+           {cartItems.map((item, index) => {
+             const displayImage = item.images && item.images.length > 0 
+                ? item.images[0] 
+                : `https://picsum.photos/200/300?random=${item.imageId}`;
+
+             return (
+               <div key={`${item.id}-${index}`} className="flex gap-6 py-6 border-b border-gray-100 animate-fade-in-up">
+                  <Link to={`/product/${item.id}`} className="w-24 h-32 bg-gray-50 flex-shrink-0 overflow-hidden">
+                    <img src={displayImage} alt={item.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                  </Link>
+                  <div className="flex-1 flex flex-col justify-between">
+                     <div className="flex justify-between items-start">
+                        <div className="space-y-1">
+                          <Link to={`/product/${item.id}`} className="font-serif text-lg hover:underline">{item.name}</Link>
+                          {item.quantity > 1 && (
+                               <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                          )}
+                        </div>
+                        <p className="font-light">
+                          {(item.price * item.quantity).toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 })}
+                        </p>
+                     </div>
+                     <button 
+                      onClick={() => removeFromCart(item.id)}
+                      className="text-gray-400 hover:text-black transition-colors self-start flex items-center gap-2 text-[10px] uppercase tracking-widest"
+                     >
+                       <Trash2 className="w-4 h-4" /> Remove
+                     </button>
+                  </div>
+               </div>
+             );
+           })}
         </div>
 
         {/* Summary */}

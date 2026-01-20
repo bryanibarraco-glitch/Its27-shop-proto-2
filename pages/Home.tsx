@@ -91,31 +91,37 @@ const Home: React.FC = () => {
                     </div>
                 ))
             ) : (
-                featuredProducts.map((product) => (
-                <div key={product.id} className="group cursor-pointer">
-                    <Link to={`/product/${product.id}`}>
-                        <div className="relative overflow-hidden aspect-[3/4] mb-4 bg-gray-100">
-                        <img 
-                            src={`https://picsum.photos/600/800?random=${product.imageId}`} 
-                            alt={product.name}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-                        <div className="absolute bottom-4 left-4 right-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                            <button className="w-full bg-white text-black py-3 text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
-                            Quick View
-                            </button>
+                featuredProducts.map((product) => {
+                    const displayImage = product.images && product.images.length > 0 
+                        ? product.images[0] 
+                        : `https://picsum.photos/600/800?random=${product.imageId}`;
+
+                    return (
+                        <div key={product.id} className="group cursor-pointer">
+                            <Link to={`/product/${product.id}`}>
+                                <div className="relative overflow-hidden aspect-[3/4] mb-4 bg-gray-100">
+                                <img 
+                                    src={displayImage} 
+                                    alt={product.name}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                                <div className="absolute bottom-4 left-4 right-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                                    <button className="w-full bg-white text-black py-3 text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
+                                    Quick View
+                                    </button>
+                                </div>
+                                </div>
+                            </Link>
+                            <div className="text-center space-y-1">
+                            <h4 className="text-lg font-serif">{product.name}</h4>
+                            <p className="text-gray-500 font-light">
+                                {product.price.toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 })}
+                            </p>
+                            </div>
                         </div>
-                        </div>
-                    </Link>
-                    <div className="text-center space-y-1">
-                    <h4 className="text-lg font-serif">{product.name}</h4>
-                    <p className="text-gray-500 font-light">
-                        {product.price.toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 })}
-                    </p>
-                    </div>
-                </div>
-                ))
+                    );
+                })
             )}
           </div>
         </div>
