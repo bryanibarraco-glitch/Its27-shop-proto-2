@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { ArrowLeft, CreditCard, Smartphone, Truck, CheckCircle, Gift } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowLeft, CreditCard, Smartphone, Truck, CheckCircle, Gift, Loader2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { supabase } from '../lib/supabaseClient';
 
 const PROVINCES = [
   'San José', 'Alajuela', 'Cartago', 'Heredia', 'Guanacaste', 'Puntarenas', 'Limón'
 ];
 
 const Checkout: React.FC = () => {
+  const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'sinpe'>('credit_card');
-  const { cartItems, cartTotal, cartCount } = useCart();
+  const { cartItems, cartTotal, cartCount, clearCart } = useCart();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Shipping Logic: Free if > 5 items, else ₡2,000
   const isFreeShipping = cartCount > 5;
@@ -17,6 +20,74 @@ const Checkout: React.FC = () => {
   const itemsNeededForFreeShipping = 6 - cartCount;
   
   const total = cartTotal + shippingCost;
+
+  // Form State
+  const [formData, setFormData] = useState({
+      name: '',
+      phone: '',
+      province: '',
+      canton: '',
+      district: '',
+      address: ''
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handlePlaceOrder = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setIsSubmitting(true);
+
+      try {
+          // 1. Insert Order
+          const { data: orderData, error: orderError } = await supabase
+              .from('orders')
+              .insert([
+                  {
+                      customer_name: formData.name,
+                      customer_phone: formData.phone,
+                      province: formData.province,
+                      canton: formData.canton,
+                      district: formData.district,
+                      address: formData.address,
+                      total_amount: total,
+                      payment_method: paymentMethod
+                  }
+              ])
+              .select()
+              .single();
+
+          if (orderError) throw orderError;
+
+          // 2. Insert Order Items
+          if (orderData) {
+              const orderItems = cartItems.map(item => ({
+                  order_id: orderData.id,
+                  product_id: item.id,
+                  quantity: item.quantity,
+                  price_at_purchase: item.price
+              }));
+
+              const { error: itemsError } = await supabase
+                  .from('order_items')
+                  .insert(orderItems);
+              
+              if (itemsError) throw itemsError;
+          }
+
+          // 3. Success & Clean up
+          clearCart();
+          alert(`Order #${orderData.id} placed successfully! Check your email/WhatsApp.`);
+          navigate('/');
+
+      } catch (error) {
+          console.error("Error placing order:", error);
+          alert("There was an error placing your order. Please try again.");
+      } finally {
+          setIsSubmitting(false);
+      }
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 md:py-20 animate-fade-in-up">
@@ -55,54 +126,56 @@ const Checkout: React.FC = () => {
             <div className="lg:col-span-2 space-y-12">
                 
                 {/* Shipping Section */}
-                <section>
-                    <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
-                        <Truck className="w-5 h-5" />
-                        <h2 className="text-xl font-serif font-bold">Shipping Information</h2>
-                    </div>
-                    
-                    <div className="bg-gray-50 p-4 mb-6 rounded-sm border border-gray-100 text-sm text-gray-600">
-                        <p className="flex items-center gap-2">
-                             <CheckCircle className="w-4 h-4 text-green-600" />
-                             Shipping handled securely by <span className="font-bold text-black">Correos de Costa Rica</span>.
-                        </p>
-                    </div>
-
-                    <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={(e) => e.preventDefault()}>
-                        <div className="md:col-span-2">
-                            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Full Name</label>
-                            <input type="text" className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors" placeholder="Juan Pérez" required />
+                <form id="checkout-form" onSubmit={handlePlaceOrder}>
+                    <section>
+                        <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                            <Truck className="w-5 h-5" />
+                            <h2 className="text-xl font-serif font-bold">Shipping Information</h2>
                         </div>
                         
-                        <div className="md:col-span-2">
-                            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Phone Number</label>
-                            <input type="tel" className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors" placeholder="8888-8888" required />
+                        <div className="bg-gray-50 p-4 mb-6 rounded-sm border border-gray-100 text-sm text-gray-600">
+                            <p className="flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                                Shipping handled securely by <span className="font-bold text-black">Correos de Costa Rica</span>.
+                            </p>
                         </div>
 
-                        <div>
-                            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Province (Provincia)</label>
-                            <select className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors cursor-pointer">
-                                <option value="">Select Province</option>
-                                {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
-                            </select>
-                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="md:col-span-2">
+                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Full Name</label>
+                                <input name="name" onChange={handleInputChange} type="text" className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors" placeholder="Juan Pérez" required />
+                            </div>
+                            
+                            <div className="md:col-span-2">
+                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Phone Number</label>
+                                <input name="phone" onChange={handleInputChange} type="tel" className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors" placeholder="8888-8888" required />
+                            </div>
 
-                        <div>
-                            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Canton</label>
-                            <input type="text" className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors" placeholder="Escazú" required />
-                        </div>
+                            <div>
+                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Province (Provincia)</label>
+                                <select name="province" onChange={handleInputChange} className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors cursor-pointer" required>
+                                    <option value="">Select Province</option>
+                                    {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+                                </select>
+                            </div>
 
-                        <div>
-                            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">District (Distrito)</label>
-                            <input type="text" className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors" placeholder="San Rafael" required />
-                        </div>
+                            <div>
+                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Canton</label>
+                                <input name="canton" onChange={handleInputChange} type="text" className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors" placeholder="Escazú" required />
+                            </div>
 
-                        <div className="md:col-span-2">
-                             <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Exact Address (Dirección Exacta)</label>
-                             <textarea rows={3} className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors resize-none" placeholder="Frente al parque, casa blanca..." required></textarea>
+                            <div>
+                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">District (Distrito)</label>
+                                <input name="district" onChange={handleInputChange} type="text" className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors" placeholder="San Rafael" required />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Exact Address (Dirección Exacta)</label>
+                                <textarea name="address" onChange={handleInputChange} rows={3} className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors resize-none" placeholder="Frente al parque, casa blanca..." required></textarea>
+                            </div>
                         </div>
-                    </form>
-                </section>
+                    </section>
+                </form>
 
                 {/* Payment Section */}
                 <section>
@@ -154,8 +227,14 @@ const Checkout: React.FC = () => {
                     </div>
                 </section>
 
-                <button className="w-full bg-black text-white py-4 uppercase tracking-[0.2em] hover:bg-gray-800 transition-colors">
-                    Place Order
+                <button 
+                    form="checkout-form"
+                    disabled={isSubmitting}
+                    className="w-full bg-black text-white py-4 uppercase tracking-[0.2em] hover:bg-gray-800 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                    {isSubmitting ? (
+                        <>Processing <Loader2 className="w-4 h-4 animate-spin" /></>
+                    ) : 'Place Order'}
                 </button>
             </div>
 

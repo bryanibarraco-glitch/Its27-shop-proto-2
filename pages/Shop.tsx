@@ -1,19 +1,45 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ChevronDown, SlidersHorizontal, X } from 'lucide-react';
-import { PRODUCTS } from '../data/products';
+import { PRODUCTS, Product } from '../data/products';
+import { supabase } from '../lib/supabaseClient';
 
 const CATEGORIES = ['All', 'Necklace', 'Ring', 'Earrings', 'Set'];
 
 const Shop: React.FC = () => {
+  const [dbProducts, setDbProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortOption, setSortOption] = useState('featured');
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
 
+  // Fetch products from Supabase
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const { data, error } = await supabase.from('products').select('*');
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+            setDbProducts(data);
+        } else {
+            // Fallback if DB is empty
+            setDbProducts(PRODUCTS);
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setDbProducts(PRODUCTS); // Fallback on error
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProducts();
+  }, []);
+
   // Filter and Sort Logic
   const filteredProducts = useMemo(() => {
-    let result = [...PRODUCTS];
+    let result = [...dbProducts];
 
     // 1. Search Filter
     if (searchQuery) {
@@ -35,7 +61,7 @@ const Shop: React.FC = () => {
     }
     
     return result;
-  }, [searchQuery, selectedCategory, sortOption]);
+  }, [searchQuery, selectedCategory, sortOption, dbProducts]);
 
   return (
     <div className="min-h-screen pt-12 px-4 max-w-7xl mx-auto pb-24">
@@ -135,7 +161,12 @@ const Shop: React.FC = () => {
       </div>
 
       {/* Product Grid */}
-      {filteredProducts.length > 0 ? (
+      {loading ? (
+        <div className="text-center py-20">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
+            <p className="mt-4 text-sm text-gray-400 uppercase tracking-widest">Loading Collection...</p>
+        </div>
+      ) : filteredProducts.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
             {filteredProducts.map((product) => (
                 <div key={product.id} className="space-y-3 group cursor-pointer">
@@ -175,7 +206,7 @@ const Shop: React.FC = () => {
           </div>
       )}
       
-      {filteredProducts.length > 0 && (
+      {!loading && filteredProducts.length > 0 && (
         <div className="flex justify-center mt-20 mb-12">
             <span className="text-xs text-gray-400 uppercase tracking-widest">Showing {filteredProducts.length} products</span>
         </div>

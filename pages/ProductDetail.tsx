@@ -1,14 +1,46 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, Truck, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
-import { PRODUCTS } from '../data/products';
+import { PRODUCTS, Product } from '../data/products';
 import { useCart } from '../context/CartContext';
+import { supabase } from '../lib/supabaseClient';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
+  const [product, setProduct] = useState<Product | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
   
-  const product = PRODUCTS.find(p => p.id === Number(id));
+  useEffect(() => {
+    async function fetchProduct() {
+      if (!id) return;
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', id)
+          .single();
+        
+        if (error) throw error;
+        setProduct(data);
+      } catch (err) {
+        console.error("Failed to fetch product, using fallback", err);
+        // Fallback to static data
+        setProduct(PRODUCTS.find(p => p.id === Number(id)));
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProduct();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (

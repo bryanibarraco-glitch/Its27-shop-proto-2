@@ -1,11 +1,40 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star } from 'lucide-react';
-import { PRODUCTS } from '../data/products';
+import { PRODUCTS, Product } from '../data/products';
+import { supabase } from '../lib/supabaseClient';
 
 const Home: React.FC = () => {
-  // Use first 3 products for preview
-  const featuredProducts = PRODUCTS.slice(0, 3);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchFeatured() {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .limit(3);
+        
+        if (error) throw error;
+        
+        // If DB is empty/new, fall back to static data for display purposes
+        if (data && data.length > 0) {
+            setFeaturedProducts(data);
+        } else {
+            setFeaturedProducts(PRODUCTS.slice(0, 3));
+        }
+      } catch (err) {
+        console.error('Error fetching featured products:', err);
+        // Fallback on error
+        setFeaturedProducts(PRODUCTS.slice(0, 3));
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchFeatured();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -52,31 +81,42 @@ const Home: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredProducts.map((product) => (
-              <div key={product.id} className="group cursor-pointer">
-                <Link to={`/product/${product.id}`}>
-                    <div className="relative overflow-hidden aspect-[3/4] mb-4 bg-gray-100">
-                    <img 
-                        src={`https://picsum.photos/600/800?random=${product.imageId}`} 
-                        alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-                    <div className="absolute bottom-4 left-4 right-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                        <button className="w-full bg-white text-black py-3 text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
-                        Quick View
-                        </button>
+            {loading ? (
+                // Loading Skeletons
+                [1,2,3].map(i => (
+                    <div key={i} className="animate-pulse space-y-4">
+                        <div className="bg-gray-200 aspect-[3/4] w-full"></div>
+                        <div className="h-4 bg-gray-200 w-3/4 mx-auto"></div>
+                        <div className="h-4 bg-gray-200 w-1/4 mx-auto"></div>
                     </div>
+                ))
+            ) : (
+                featuredProducts.map((product) => (
+                <div key={product.id} className="group cursor-pointer">
+                    <Link to={`/product/${product.id}`}>
+                        <div className="relative overflow-hidden aspect-[3/4] mb-4 bg-gray-100">
+                        <img 
+                            src={`https://picsum.photos/600/800?random=${product.imageId}`} 
+                            alt={product.name}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                        <div className="absolute bottom-4 left-4 right-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                            <button className="w-full bg-white text-black py-3 text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
+                            Quick View
+                            </button>
+                        </div>
+                        </div>
+                    </Link>
+                    <div className="text-center space-y-1">
+                    <h4 className="text-lg font-serif">{product.name}</h4>
+                    <p className="text-gray-500 font-light">
+                        {product.price.toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 })}
+                    </p>
                     </div>
-                </Link>
-                <div className="text-center space-y-1">
-                  <h4 className="text-lg font-serif">{product.name}</h4>
-                  <p className="text-gray-500 font-light">
-                    {product.price.toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 })}
-                  </p>
                 </div>
-              </div>
-            ))}
+                ))
+            )}
           </div>
         </div>
       </section>
