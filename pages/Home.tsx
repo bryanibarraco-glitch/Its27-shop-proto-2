@@ -341,7 +341,8 @@ const Home: React.FC = () => {
                           <div>
                               <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Header Logo</label>
                               <div className="flex items-center gap-4">
-                                  <div className="w-32 h-16 bg-gray-100 rounded-sm overflow-hidden flex items-center justify-center border border-gray-200 relative group">
+                                  {/* UPDATED: Wider container for rectangular logos */}
+                                  <div className="w-64 h-24 bg-gray-100 rounded-sm overflow-hidden flex items-center justify-center border border-gray-200 relative group">
                                       {logoUrl ? (
                                           <img src={logoUrl} className="max-w-full max-h-full object-contain p-2" alt="Logo" />
                                       ) : (
@@ -361,7 +362,7 @@ const Home: React.FC = () => {
                                       <button onClick={() => setLogoUrl('')} className="text-xs text-red-500 hover:text-red-700 underline">Remove</button>
                                   )}
                               </div>
-                              <p className="text-[10px] text-gray-400 mt-1">Recommended: Transparent PNG, approx 200x80px</p>
+                              <p className="text-[10px] text-gray-400 mt-1">Recommended: Transparent PNG, wider format supported.</p>
                           </div>
                       </div>
 

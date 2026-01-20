@@ -68,7 +68,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                 <img 
                   src={logoUrl} 
                   alt="ITS27 Jewelry" 
-                  className="h-12 md:h-14 w-auto object-contain transition-opacity group-hover:opacity-90" 
+                  className="h-12 md:h-16 w-auto object-contain transition-opacity group-hover:opacity-90" 
                 />
               ) : (
                 <>
