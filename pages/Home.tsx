@@ -22,6 +22,7 @@ const Home: React.FC = () => {
   // Content State
   const [heroConfig, setHeroConfig] = useState(DEFAULT_HERO);
   const [featuredIds, setFeaturedIds] = useState<number[]>([]);
+  const [logoUrl, setLogoUrl] = useState('');
   
   // Display Data
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
@@ -45,19 +46,29 @@ const Home: React.FC = () => {
 
   const fetchSiteSettings = async () => {
     try {
-      // Fetch Config
-      const { data: settings, error } = await supabase
+      // Fetch Home Config
+      const { data: homeSettings } = await supabase
         .from('site_settings')
         .select('*')
         .eq('key', 'home_config')
         .single();
 
-      if (settings && settings.content) {
-        setHeroConfig({ ...DEFAULT_HERO, ...settings.content.hero });
-        setFeaturedIds(settings.content.featuredIds || []);
+      if (homeSettings && homeSettings.content) {
+        setHeroConfig({ ...DEFAULT_HERO, ...homeSettings.content.hero });
+        setFeaturedIds(homeSettings.content.featuredIds || []);
       } else {
-        // Init with defaults if no DB row exists yet
         setFeaturedIds([1, 2, 3]); 
+      }
+
+      // Fetch Global Config (Logo)
+      const { data: globalSettings } = await supabase
+        .from('site_settings')
+        .select('*')
+        .eq('key', 'global_config')
+        .single();
+      
+      if (globalSettings && globalSettings.content && globalSettings.content.logoUrl) {
+          setLogoUrl(globalSettings.content.logoUrl);
       }
 
       // Fetch All Products (for the admin selector)
@@ -73,7 +84,6 @@ const Home: React.FC = () => {
 
   const fetchFeaturedProducts = async () => {
     if (featuredIds.length === 0) {
-        // Fallback to static if empty
         setFeaturedProducts(PRODUCTS.slice(0, 3)); 
         return;
     }
@@ -84,7 +94,6 @@ const Home: React.FC = () => {
       .in('id', featuredIds);
     
     if (data) {
-        // Sort them in the order of the IDs array (to maintain user preference)
         const sorted = featuredIds.map(id => data.find(p => p.id === id)).filter(Boolean) as Product[];
         setFeaturedProducts(sorted);
     }
@@ -92,18 +101,27 @@ const Home: React.FC = () => {
 
   const handleSaveSettings = async () => {
     setSaving(true);
-    const payload = {
+    
+    // 1. Save Home Config
+    const homePayload = {
         hero: heroConfig,
         featuredIds: featuredIds
     };
-
-    const { error } = await supabase
+    const { error: homeError } = await supabase
         .from('site_settings')
-        .upsert({ key: 'home_config', content: payload });
+        .upsert({ key: 'home_config', content: homePayload });
+
+    // 2. Save Global Config
+    const globalPayload = {
+        logoUrl: logoUrl
+    };
+    const { error: globalError } = await supabase
+        .from('site_settings')
+        .upsert({ key: 'global_config', content: globalPayload });
 
     setSaving(false);
-    if (error) {
-        alert("Failed to save changes: " + error.message);
+    if (homeError || globalError) {
+        alert("Failed to save changes. Please try again.");
     } else {
         setIsEditModalOpen(false);
         fetchFeaturedProducts();
@@ -113,12 +131,21 @@ const Home: React.FC = () => {
   const handleHeroImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
-    const fileExt = file.name.split('.').pop();
-    const fileName = `hero-${Date.now()}.${fileExt}`;
+    await uploadFile(file, (url) => setHeroConfig({ ...heroConfig, imageUrl: url }));
+  };
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    await uploadFile(file, (url) => setLogoUrl(url));
+  };
+
+  const uploadFile = async (file: File, onSuccess: (url: string) => void) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `asset-${Date.now()}.${fileExt}`;
     setSaving(true);
+
     const { error } = await supabase.storage.from('products').upload(fileName, file);
-    
     if (error) {
         alert("Upload failed: " + error.message);
         setSaving(false);
@@ -127,7 +154,7 @@ const Home: React.FC = () => {
 
     const { data } = supabase.storage.from('products').getPublicUrl(fileName);
     if (data) {
-        setHeroConfig({ ...heroConfig, imageUrl: data.publicUrl });
+        onSuccess(data.publicUrl);
     }
     setSaving(false);
   };
@@ -138,7 +165,6 @@ const Home: React.FC = () => {
               return prev.filter(pid => pid !== id);
           } else {
               if (prev.length >= 3) {
-                  // Optional: replace the first one or just stop? Let's stop.
                   alert("You can only select 3 featured products. Deselect one first.");
                   return prev;
               }
@@ -156,7 +182,7 @@ const Home: React.FC = () => {
             onClick={() => setIsEditModalOpen(true)}
             className="fixed bottom-6 left-6 z-50 bg-black text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 hover:scale-105 transition-transform uppercase tracking-widest text-xs font-bold"
           >
-              <Edit3 className="w-4 h-4" /> Customize Home
+              <Edit3 className="w-4 h-4" /> Customize Site
           </button>
       )}
 
@@ -299,7 +325,7 @@ const Home: React.FC = () => {
                   
                   {/* Header */}
                   <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-                      <h2 className="text-xl font-serif font-bold">Customize Home</h2>
+                      <h2 className="text-xl font-serif font-bold">Customize Site</h2>
                       <button onClick={() => setIsEditModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-full">
                           <X className="w-5 h-5" />
                       </button>
@@ -308,6 +334,37 @@ const Home: React.FC = () => {
                   {/* Body */}
                   <div className="flex-1 p-6 space-y-8">
                       
+                      {/* Section: Global Settings */}
+                      <div className="space-y-4">
+                          <h3 className="text-xs uppercase tracking-widest text-gray-400 font-bold border-b pb-2">Global Settings</h3>
+                          
+                          <div>
+                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Header Logo</label>
+                              <div className="flex items-center gap-4">
+                                  <div className="w-32 h-16 bg-gray-100 rounded-sm overflow-hidden flex items-center justify-center border border-gray-200 relative group">
+                                      {logoUrl ? (
+                                          <img src={logoUrl} className="max-w-full max-h-full object-contain p-2" alt="Logo" />
+                                      ) : (
+                                          <span className="text-xs text-gray-400">No Logo</span>
+                                      )}
+                                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                           <p className="text-white text-[10px] font-bold uppercase">Upload</p>
+                                      </div>
+                                      <input 
+                                        type="file" 
+                                        accept="image/*"
+                                        onChange={handleLogoUpload}
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                      />
+                                  </div>
+                                  {logoUrl && (
+                                      <button onClick={() => setLogoUrl('')} className="text-xs text-red-500 hover:text-red-700 underline">Remove</button>
+                                  )}
+                              </div>
+                              <p className="text-[10px] text-gray-400 mt-1">Recommended: Transparent PNG, approx 200x80px</p>
+                          </div>
+                      </div>
+
                       {/* Section: Hero */}
                       <div className="space-y-4">
                           <h3 className="text-xs uppercase tracking-widest text-gray-400 font-bold border-b pb-2">Hero Section</h3>
