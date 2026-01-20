@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, Truck, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Truck, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
 import { PRODUCTS, Product } from '../data/products';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabaseClient';
@@ -113,16 +113,10 @@ const ProductDetail: React.FC = () => {
            <div>
              <h1 className="text-3xl md:text-5xl font-serif font-bold mb-4">{product.name}</h1>
              
-             <div className="flex items-center gap-4 mb-6">
+             <div className="mb-6">
                 <p className="text-2xl font-light">
                   {product.price.toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 })}
                 </p>
-                <div className="flex items-center gap-0.5 text-black">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                        <Star key={s} className="w-3 h-3 fill-current" />
-                    ))}
-                    <span className="text-gray-400 text-xs ml-2">(24 reviews)</span>
-                </div>
              </div>
            </div>
            
