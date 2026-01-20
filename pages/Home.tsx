@@ -312,8 +312,18 @@ const Home: React.FC = () => {
                       <div className="space-y-4">
                           <h3 className="text-xs uppercase tracking-widest text-gray-400 font-bold border-b pb-2">Hero Section</h3>
                           
+                           <div>
+                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Upper Text</label>
+                              <input 
+                                type="text"
+                                value={heroConfig.subtitle} 
+                                onChange={(e) => setHeroConfig({...heroConfig, subtitle: e.target.value})}
+                                className="w-full border border-gray-300 p-2 text-sm rounded-sm focus:border-black outline-none"
+                              />
+                          </div>
+                          
                           <div>
-                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Main Title</label>
+                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Title</label>
                               <textarea 
                                 rows={2}
                                 value={heroConfig.title} 
@@ -322,12 +332,12 @@ const Home: React.FC = () => {
                               />
                           </div>
 
-                           <div>
-                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Subtitle</label>
-                              <input 
-                                type="text"
-                                value={heroConfig.subtitle} 
-                                onChange={(e) => setHeroConfig({...heroConfig, subtitle: e.target.value})}
+                          <div>
+                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Lower Text</label>
+                              <textarea 
+                                rows={3}
+                                value={heroConfig.description} 
+                                onChange={(e) => setHeroConfig({...heroConfig, description: e.target.value})}
                                 className="w-full border border-gray-300 p-2 text-sm rounded-sm focus:border-black outline-none"
                               />
                           </div>
