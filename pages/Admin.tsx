@@ -16,7 +16,6 @@ interface Order {
   id: number;
   created_at: string;
   customer_name: string;
-  customer_email?: string; // ADDED: Optional email field
   customer_phone: string;
   province: string;
   canton: string;
@@ -691,7 +690,6 @@ const Admin: React.FC = () => {
                           <div>
                               <p className="text-xs uppercase tracking-widest text-gray-500 mb-1">Customer</p>
                               <p className="font-bold">{selectedOrder.customer_name}</p>
-                              {selectedOrder.customer_email && <p className="text-sm text-gray-600">{selectedOrder.customer_email}</p>}
                               <p className="text-sm">{selectedOrder.customer_phone}</p>
                           </div>
                           <div>

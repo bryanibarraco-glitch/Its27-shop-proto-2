@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, CreditCard, Smartphone, Truck, CheckCircle, Gift, Loader2 } from 'lucide-react';
+import { ArrowLeft, CreditCard, Smartphone, Truck, CheckCircle, Gift, Loader2, AlertTriangle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabaseClient';
@@ -14,14 +14,24 @@ const EMAIL_SERVICE_ID = 'service_gbzwvkp';
 const EMAIL_TEMPLATE_ID = 'template_hszdk4s';
 const EMAIL_PUBLIC_KEY = '1-44LVx0fgEwJCGMb';
 
+// Helper: Generate a professional looking order code (e.g., ITS-9X2B-1234)
+const generateOrderCode = () => {
+  const prefix = "ITS"; // for Its27 Jewelry
+  const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const timestamp = Date.now().toString().slice(-4);
+  return `${prefix}-${randomPart}-${timestamp}`;
+};
+
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
-  // CHANGED: Updated type to use 'sinpe_movil' for better DB compatibility
   const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'sinpe_movil'>('credit_card');
   const { cartItems, cartTotal, cartCount, clearCart } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Shipping Logic: Free if > 5 items, else ₡2,000
+  // Error Handling State
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  
+  // Shipping Logic
   const isFreeShipping = cartCount > 5;
   const shippingCost = isFreeShipping ? 0 : 2000;
   const itemsNeededForFreeShipping = 6 - cartCount;
@@ -35,24 +45,24 @@ const Checkout: React.FC = () => {
       province: '',
       canton: '',
       district: '',
-      address: '',
-      email: '' 
+      address: ''
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       setFormData({ ...formData, [e.target.name]: e.target.value });
+      if (errorMsg) {
+          setErrorMsg(null);
+      }
   };
 
-  const sendOrderEmail = async (orderId: number) => {
-      // 1. Format the items list for the email
+  const sendOrderEmail = async (orderCode: string) => {
       const itemsListHtml = cartItems.map(item => 
           `- ${item.name} (Qty: ${item.quantity}) - ₡${(item.price * item.quantity).toLocaleString('es-CR')}`
       ).join('\n');
 
       const templateParams = {
-          order_id: orderId,
+          order_id: orderCode, // Using the code instead of ID
           customer_name: formData.name,
-          customer_email: formData.email,
           customer_phone: formData.phone,
           shipping_address: `${formData.address}, ${formData.district}, ${formData.canton}, ${formData.province}`,
           order_items: itemsListHtml,
@@ -65,65 +75,56 @@ const Checkout: React.FC = () => {
           console.log("Email sent successfully!");
       } catch (error) {
           console.error("Failed to send email:", error);
-          // We do not stop the order process if email fails, just log it.
       }
   };
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
       e.preventDefault();
       setIsSubmitting(true);
+      setErrorMsg(null);
+
+      // 1. Generate the receipt number LOCALLY
+      const orderCode = generateOrderCode();
 
       try {
-          // 1. Insert Order
-          const { data: orderData, error: orderError } = await supabase
+          // 2. Prepare the data payload
+          // Note: 'items' and 'order_code' columns must exist in your Supabase 'orders' table
+          const orderPayload = {
+              customer_name: formData.name,
+              customer_phone: formData.phone,
+              province: formData.province,
+              canton: formData.canton,
+              district: formData.district,
+              address: formData.address,
+              total_amount: total,
+              payment_method: paymentMethod,
+              status: 'pending',
+              order_code: orderCode, // New field for reference
+              items: cartItems       // Storing items as JSON to bypass relational insert restrictions for guests
+          };
+
+          // 3. Insert Order (WITHOUT .select())
+          // This avoids the "42501 new row violates row-level security policy" error
+          // because we are not asking to READ the row back, only INSERT it.
+          const { error: orderError } = await supabase
               .from('orders')
-              .insert([
-                  {
-                      customer_name: formData.name,
-                      customer_email: formData.email, // CHANGED: Added email to DB insert
-                      customer_phone: formData.phone,
-                      province: formData.province,
-                      canton: formData.canton,
-                      district: formData.district,
-                      address: formData.address,
-                      total_amount: total,
-                      payment_method: paymentMethod, // Uses 'sinpe_movil' or 'credit_card'
-                      status: 'pending'
-                  }
-              ])
-              .select()
-              .single();
+              .insert([orderPayload]);
 
           if (orderError) throw orderError;
 
-          // 2. Insert Order Items
-          if (orderData) {
-              const orderItems = cartItems.map(item => ({
-                  order_id: orderData.id,
-                  product_id: item.id,
-                  quantity: item.quantity,
-                  price_at_purchase: item.price
-              }));
+          // 4. Send Email Automation
+          await sendOrderEmail(orderCode);
 
-              const { error: itemsError } = await supabase
-                  .from('order_items')
-                  .insert(orderItems);
-              
-              if (itemsError) throw itemsError;
-
-              // 3. Send Email Automation
-              await sendOrderEmail(orderData.id);
-
-              // 4. Success & Clean up
-              clearCart();
-              alert(`Order #${orderData.id} placed successfully!`);
-              navigate('/');
-          }
+          // 5. Success
+          clearCart();
+          alert(`Order placed successfully! Reference: ${orderCode}`);
+          navigate('/');
 
       } catch (error: any) {
           console.error("Error placing order:", error);
-          // CHANGED: Alert now shows the specific error message
-          alert(`Error placing order: ${error.message || 'Please check your information and try again.'}`);
+          const msg = error.message || 'Please check your information and try again.';
+          alert(`Order failed: ${msg}`);
+          setErrorMsg(msg);
       } finally {
           setIsSubmitting(false);
       }
@@ -160,6 +161,17 @@ const Checkout: React.FC = () => {
 
         <h1 className="text-3xl font-serif font-bold mb-8">Checkout</h1>
 
+        {/* Error Display */}
+        {errorMsg && (
+            <div className="bg-red-50 text-red-700 p-4 mb-8 rounded-md border border-red-100 flex items-start gap-3 animate-fade-in">
+                <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                    <h3 className="font-bold text-sm">Order Failed</h3>
+                    <p className="text-sm mt-1">{errorMsg}</p>
+                </div>
+            </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             
             {/* Main Form Area */}
@@ -184,11 +196,6 @@ const Checkout: React.FC = () => {
                             <div className="md:col-span-2">
                                 <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Full Name</label>
                                 <input name="name" onChange={handleInputChange} type="text" className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors" placeholder="Juan Pérez" required />
-                            </div>
-
-                             <div className="md:col-span-2">
-                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Email Address</label>
-                                <input name="email" onChange={handleInputChange} type="email" className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors" placeholder="juan@example.com" required />
                             </div>
                             
                             <div className="md:col-span-2">
