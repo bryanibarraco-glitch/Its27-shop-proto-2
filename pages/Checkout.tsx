@@ -30,6 +30,10 @@ const Checkout: React.FC = () => {
   
   // Error Handling State
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Success Modal State
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [finalOrderCode, setFinalOrderCode] = useState('');
   
   // Shipping Logic
   const isFreeShipping = cartCount > 5;
@@ -125,8 +129,8 @@ const Checkout: React.FC = () => {
 
           // 5. Success
           clearCart();
-          alert(`Order placed successfully! Reference: ${orderCode}`);
-          navigate('/');
+          setFinalOrderCode(orderCode);
+          setShowSuccessModal(true);
 
       } catch (error: any) {
           console.error("Error placing order:", error);
@@ -139,7 +143,7 @@ const Checkout: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12 md:py-20 animate-fade-in-up">
+    <div className="max-w-4xl mx-auto px-4 py-12 md:py-20 animate-fade-in-up relative">
         {/* Back link */}
         <Link to="/cart" className="inline-flex items-center gap-2 text-gray-500 hover:text-black mb-8 transition-colors text-sm uppercase tracking-widest">
             <ArrowLeft className="w-4 h-4" /> Back to Cart
@@ -333,6 +337,43 @@ const Checkout: React.FC = () => {
                 </div>
             </div>
         </div>
+
+        {/* SUCCESS MODAL */}
+        {showSuccessModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full text-center space-y-6 transform transition-all scale-100 border border-gray-100">
+                    <div className="mx-auto w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-4">
+                        <CheckCircle className="w-10 h-10 text-green-600" />
+                    </div>
+                    
+                    <div>
+                        <h2 className="text-3xl font-serif font-bold text-gray-900 mb-2">
+                            Gracias por tu compra!
+                        </h2>
+                        <p className="text-gray-500 font-light">
+                            We have received your order.
+                        </p>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-4 rounded-md border border-gray-100">
+                        <p className="text-xs uppercase tracking-widest text-gray-500 mb-1">Order Reference</p>
+                        <p className="font-mono font-bold text-xl text-black">{finalOrderCode}</p>
+                    </div>
+                    
+                    <p className="text-sm text-gray-500">
+                        A confirmation email has been sent to the store admin. <br/> 
+                        <span className="text-xs italic"> (Customer receipt is sent if configured)</span>
+                    </p>
+
+                    <button 
+                        onClick={() => navigate('/')}
+                        className="w-full bg-black text-white py-4 uppercase tracking-widest hover:bg-gray-800 transition-colors shadow-lg"
+                    >
+                        Continue Shopping
+                    </button>
+                </div>
+            </div>
+        )}
     </div>
   );
 };
