@@ -635,10 +635,10 @@ const Admin: React.FC = () => {
       {/* 1. PRODUCT MODAL */}
       {isProductModalOpen && (
           <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
-              <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                  <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-                      <h2 className="text-xl font-bold font-serif">{isEditing ? 'Edit Product' : 'New Product'}</h2>
-                      <button onClick={() => setIsProductModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-full">
+              <div className="bg-gray-50 rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                  <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-gray-50 z-10">
+                      <h2 className="text-xl font-bold font-serif text-black">{isEditing ? 'Edit Product' : 'New Product'}</h2>
+                      <button onClick={() => setIsProductModalOpen(false)} className="p-2 hover:bg-gray-200 rounded-full transition-colors text-black">
                           <X className="w-6 h-6" />
                       </button>
                   </div>
@@ -663,7 +663,7 @@ const Admin: React.FC = () => {
                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                         disabled={uploading}
                                     />
-                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center group-hover:border-black transition-colors flex flex-col items-center gap-2">
+                                    <div className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-8 text-center group-hover:border-black transition-colors flex flex-col items-center gap-2">
                                         <Upload className="w-6 h-6 text-gray-400 group-hover:text-black" />
                                         <span className="text-sm text-gray-500">Drag & Drop or Click to Upload</span>
                                     </div>
@@ -713,7 +713,7 @@ const Admin: React.FC = () => {
                                     type="text" 
                                     value={formData.name}
                                     onChange={e => setFormData({...formData, name: e.target.value})}
-                                    className="w-full border border-gray-300 p-3 rounded-sm focus:outline-none focus:border-black"
+                                    className="w-full bg-white text-black border border-gray-300 p-3 rounded-sm focus:outline-none focus:border-black transition-colors"
                                     required 
                                   />
                               </div>
@@ -724,7 +724,7 @@ const Admin: React.FC = () => {
                                     <select 
                                         value={formData.category}
                                         onChange={e => setFormData({...formData, category: e.target.value})}
-                                        className="w-full border border-gray-300 p-3 rounded-sm focus:outline-none focus:border-black"
+                                        className="w-full bg-white text-black border border-gray-300 p-3 rounded-sm focus:outline-none focus:border-black transition-colors"
                                     >
                                         {['Anillo', 'Collar', 'Aretes', 'Conjunto'].map(c => (
                                             <option key={c} value={c}>{c}</option>
@@ -738,7 +738,7 @@ const Admin: React.FC = () => {
                                         type="number" 
                                         value={formData.price}
                                         onChange={e => setFormData({...formData, price: Number(e.target.value)})}
-                                        className="w-full border border-gray-300 p-3 rounded-sm focus:outline-none focus:border-black"
+                                        className="w-full bg-white text-black border border-gray-300 p-3 rounded-sm focus:outline-none focus:border-black transition-colors"
                                         required 
                                     />
                                 </div>
@@ -750,14 +750,14 @@ const Admin: React.FC = () => {
                                     rows={6}
                                     value={formData.description || ''}
                                     onChange={e => setFormData({...formData, description: e.target.value})}
-                                    className="w-full border border-gray-300 p-3 rounded-sm focus:outline-none focus:border-black resize-none"
+                                    className="w-full bg-white text-black border border-gray-300 p-3 rounded-sm focus:outline-none focus:border-black resize-none transition-colors"
                                   ></textarea>
                               </div>
                           </div>
                       </div>
 
-                      <div className="flex justify-end gap-4 pt-6 border-t border-gray-100">
-                          <button type="button" onClick={() => setIsProductModalOpen(false)} className="px-6 py-3 text-sm uppercase tracking-widest hover:bg-gray-100 transition-colors">Cancel</button>
+                      <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
+                          <button type="button" onClick={() => setIsProductModalOpen(false)} className="px-6 py-3 text-sm uppercase tracking-widest hover:bg-gray-200 transition-colors text-black">Cancel</button>
                           <button type="submit" disabled={uploading} className="flex items-center gap-2 bg-black text-white px-8 py-3 text-sm uppercase tracking-widest hover:bg-gray-800 transition-colors disabled:opacity-50">
                               <Save className="w-4 h-4" /> Save Product
                           </button>
