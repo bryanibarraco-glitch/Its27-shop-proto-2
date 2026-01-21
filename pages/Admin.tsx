@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Package, Plus, Trash2, Edit2, LogOut, Save, X, Image as ImageIcon, Upload, Loader2, Star, ChevronLeft, ChevronRight, ShoppingBag, Eye, Truck, CheckCircle } from 'lucide-react';
+import { LayoutDashboard, Package, Plus, Trash2, Edit2, LogOut, Save, X, Image as ImageIcon, Upload, Loader2, Star, ChevronLeft, ChevronRight, ShoppingBag, Eye, Truck, CheckCircle, MessageSquare, Mail } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { Product } from '../data/products';
 
@@ -27,12 +27,21 @@ interface Order {
   order_items?: OrderItem[];
 }
 
+interface ContactMessage {
+  id: number;
+  created_at: string;
+  name: string;
+  email: string;
+  message: string;
+  status?: string;
+}
+
 const Admin: React.FC = () => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
   // Dashboard State
-  const [activeTab, setActiveTab] = useState<'products' | 'orders'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'messages'>('products');
   
   // Product State
   const [products, setProducts] = useState<Product[]>([]);
@@ -43,6 +52,9 @@ const Admin: React.FC = () => {
   // Order State
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  // Messages State
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
 
   // Form State
   const [formData, setFormData] = useState<Partial<Product>>({
@@ -66,6 +78,7 @@ const Admin: React.FC = () => {
       if (session) {
           fetchProducts();
           fetchOrders();
+          fetchMessages();
       }
       setLoading(false);
     });
@@ -77,6 +90,7 @@ const Admin: React.FC = () => {
       if (session) {
           fetchProducts();
           fetchOrders();
+          fetchMessages();
       }
     });
 
@@ -95,9 +109,6 @@ const Admin: React.FC = () => {
   };
 
   const fetchOrders = async () => {
-    // Note: This requires Foreign Keys to be set up in Supabase:
-    // order_items.order_id -> orders.id
-    // order_items.product_id -> products.id
     const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -112,6 +123,23 @@ const Admin: React.FC = () => {
 
     if (error) console.error('Error fetching orders:', error);
     else setOrders((data as any) || []);
+  };
+
+  const fetchMessages = async () => {
+    const { data, error } = await supabase
+      .from('contact_messages')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) console.error('Error fetching messages:', error);
+    else setMessages(data || []);
+  };
+
+  const deleteMessage = async (id: number) => {
+      if(!confirm("Are you sure you want to delete this message?")) return;
+      const { error } = await supabase.from('contact_messages').delete().eq('id', id);
+      if(error) alert("Error deleting message");
+      else fetchMessages();
   };
 
   const updateOrderStatus = async (orderId: number, newStatus: string) => {
@@ -149,6 +177,7 @@ const Admin: React.FC = () => {
     await supabase.auth.signOut();
     setProducts([]);
     setOrders([]);
+    setMessages([]);
   };
 
   // 4. Product CRUD
@@ -354,7 +383,7 @@ const Admin: React.FC = () => {
         </div>
         
         {/* Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-4">
                 <div className="p-3 bg-black/5 rounded-full">
                     <Package className="w-6 h-6 text-black" />
@@ -384,10 +413,19 @@ const Admin: React.FC = () => {
                     </p>
                 </div>
             </div>
+            <div className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-4">
+                <div className="p-3 bg-black/5 rounded-full">
+                    <MessageSquare className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500 uppercase tracking-wide">Messages</p>
+                    <p className="text-2xl font-bold">{messages.length}</p>
+                </div>
+            </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="mb-6 flex gap-4 border-b border-gray-200">
+        <div className="mb-6 flex gap-6 border-b border-gray-200">
              <button 
                 onClick={() => setActiveTab('products')}
                 className={`pb-4 text-sm uppercase tracking-widest font-bold transition-colors ${activeTab === 'products' ? 'border-b-2 border-black text-black' : 'text-gray-400 hover:text-gray-600'}`}
@@ -399,6 +437,12 @@ const Admin: React.FC = () => {
                 className={`pb-4 text-sm uppercase tracking-widest font-bold transition-colors ${activeTab === 'orders' ? 'border-b-2 border-black text-black' : 'text-gray-400 hover:text-gray-600'}`}
              >
                  Orders
+             </button>
+             <button 
+                onClick={() => setActiveTab('messages')}
+                className={`pb-4 text-sm uppercase tracking-widest font-bold transition-colors flex items-center gap-2 ${activeTab === 'messages' ? 'border-b-2 border-black text-black' : 'text-gray-400 hover:text-gray-600'}`}
+             >
+                 Messages {messages.length > 0 && <span className="bg-gray-100 text-black px-1.5 rounded-full text-[10px]">{messages.length}</span>}
              </button>
         </div>
 
@@ -520,6 +564,62 @@ const Admin: React.FC = () => {
                                 {orders.length === 0 && (
                                     <tr>
                                         <td colSpan={6} className="p-8 text-center text-gray-500 italic">No orders found.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </>
+            )}
+
+            {/* MESSAGES TAB */}
+            {activeTab === 'messages' && (
+                <>
+                    <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+                        <h2 className="text-xl font-bold font-serif">Inquiries</h2>
+                        <button onClick={fetchMessages} className="text-xs uppercase tracking-widest hover:underline">Refresh</button>
+                    </div>
+                    
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead className="bg-gray-50 text-xs uppercase tracking-widest text-gray-500">
+                                <tr>
+                                    <th className="p-4">Date</th>
+                                    <th className="p-4">Name</th>
+                                    <th className="p-4">Email</th>
+                                    <th className="p-4 w-1/3">Message</th>
+                                    <th className="p-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {messages.map((msg) => {
+                                    const date = new Date(msg.created_at).toLocaleDateString('es-CR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                                    
+                                    return (
+                                        <tr key={msg.id} className="hover:bg-gray-50/50 transition-colors align-top">
+                                            <td className="p-4 text-sm text-gray-500 whitespace-nowrap">{date}</td>
+                                            <td className="p-4 font-medium">{msg.name}</td>
+                                            <td className="p-4 text-sm text-blue-600">
+                                              <a href={`mailto:${msg.email}`} className="flex items-center gap-1 hover:underline">
+                                                <Mail className="w-3 h-3" /> {msg.email}
+                                              </a>
+                                            </td>
+                                            <td className="p-4 text-sm text-gray-600">{msg.message}</td>
+                                            <td className="p-4 text-right">
+                                                <button 
+                                                    onClick={() => deleteMessage(msg.id)}
+                                                    className="p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-full transition-colors"
+                                                    title="Delete Message"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                                {messages.length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} className="p-8 text-center text-gray-500 italic">No messages found.</td>
                                     </tr>
                                 )}
                             </tbody>
