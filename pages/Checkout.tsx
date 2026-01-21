@@ -16,7 +16,8 @@ const EMAIL_PUBLIC_KEY = '1-44LVx0fgEwJCGMb';
 
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
-  const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'sinpe'>('credit_card');
+  // CHANGED: Updated type to use 'sinpe_movil' for better DB compatibility
+  const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'sinpe_movil'>('credit_card');
   const { cartItems, cartTotal, cartCount, clearCart } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -56,7 +57,7 @@ const Checkout: React.FC = () => {
           shipping_address: `${formData.address}, ${formData.district}, ${formData.canton}, ${formData.province}`,
           order_items: itemsListHtml,
           total_amount: `₡${total.toLocaleString('es-CR')}`,
-          payment_method: paymentMethod.toUpperCase(),
+          payment_method: paymentMethod.toUpperCase().replace('_', ' '),
       };
 
       try {
@@ -79,14 +80,15 @@ const Checkout: React.FC = () => {
               .insert([
                   {
                       customer_name: formData.name,
+                      customer_email: formData.email, // CHANGED: Added email to DB insert
                       customer_phone: formData.phone,
                       province: formData.province,
                       canton: formData.canton,
                       district: formData.district,
                       address: formData.address,
                       total_amount: total,
-                      payment_method: paymentMethod,
-                      status: 'pending' // Ensure default status
+                      payment_method: paymentMethod, // Uses 'sinpe_movil' or 'credit_card'
+                      status: 'pending'
                   }
               ])
               .select()
@@ -118,9 +120,10 @@ const Checkout: React.FC = () => {
               navigate('/');
           }
 
-      } catch (error) {
+      } catch (error: any) {
           console.error("Error placing order:", error);
-          alert("There was an error placing your order. Please try again.");
+          // CHANGED: Alert now shows the specific error message
+          alert(`Error placing order: ${error.message || 'Please check your information and try again.'}`);
       } finally {
           setIsSubmitting(false);
       }
@@ -229,17 +232,17 @@ const Checkout: React.FC = () => {
                     <div className="space-y-4">
                         {/* Sinpe Movil Option */}
                         <div 
-                            onClick={() => setPaymentMethod('sinpe')}
-                            className={`border rounded-lg p-6 cursor-pointer transition-all ${paymentMethod === 'sinpe' ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300'}`}
+                            onClick={() => setPaymentMethod('sinpe_movil')}
+                            className={`border rounded-lg p-6 cursor-pointer transition-all ${paymentMethod === 'sinpe_movil' ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300'}`}
                         >
                             <div className="flex items-center gap-3 mb-2">
-                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === 'sinpe' ? 'border-black' : 'border-gray-300'}`}>
-                                    {paymentMethod === 'sinpe' && <div className="w-2 h-2 rounded-full bg-black"></div>}
+                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === 'sinpe_movil' ? 'border-black' : 'border-gray-300'}`}>
+                                    {paymentMethod === 'sinpe_movil' && <div className="w-2 h-2 rounded-full bg-black"></div>}
                                 </div>
                                 <span className="font-bold flex items-center gap-2"> <Smartphone className="w-4 h-4" /> SINPE Móvil</span>
                             </div>
                             
-                            {paymentMethod === 'sinpe' && (
+                            {paymentMethod === 'sinpe_movil' && (
                                 <div className="ml-7 mt-3 text-sm text-gray-600 animate-fade-in">
                                     <p className="mb-2">Please make your transfer to:</p>
                                     <p className="text-xl font-bold text-black tracking-wider">6221-4479</p>
