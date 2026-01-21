@@ -36,9 +36,9 @@ const Checkout: React.FC = () => {
   const [finalOrderCode, setFinalOrderCode] = useState('');
   
   // Shipping Logic
-  const isFreeShipping = cartCount > 5;
+  const isFreeShipping = cartCount >= 5;
   const shippingCost = isFreeShipping ? 0 : 2000;
-  const itemsNeededForFreeShipping = 6 - cartCount;
+  const itemsNeededForFreeShipping = 5 - cartCount;
   
   const total = cartTotal + shippingCost;
 

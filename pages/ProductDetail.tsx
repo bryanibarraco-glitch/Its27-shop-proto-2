@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Truck, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Truck, ShieldCheck, ArrowRight, ArrowLeft, ShoppingBag } from 'lucide-react';
 import { PRODUCTS, Product } from '../data/products';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabaseClient';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { addToCart } = useCart();
   const [product, setProduct] = useState<Product | undefined>(undefined);
   const [loading, setLoading] = useState(true);
@@ -41,6 +42,13 @@ const ProductDetail: React.FC = () => {
     }
     fetchProduct();
   }, [id]);
+
+  const handleBuyNow = () => {
+    if (product) {
+      addToCart(product);
+      navigate('/checkout');
+    }
+  };
 
   if (loading) {
     return (
@@ -131,12 +139,19 @@ const ProductDetail: React.FC = () => {
                 >
                     Agregar al Carrito <ArrowRight className="w-4 h-4" />
                 </button>
+
+                <button 
+                  onClick={handleBuyNow}
+                  className="w-full border border-black bg-white text-black py-4 uppercase tracking-[0.2em] hover:bg-gray-50 active:scale-[0.99] transition-all flex items-center justify-center gap-3"
+                >
+                    Comprar Ahora <ShoppingBag className="w-4 h-4" />
+                </button>
            </div>
            
            <div className="pt-8 border-t border-gray-100 grid grid-cols-2 gap-4">
               <div className="flex items-center gap-3 text-sm text-gray-500">
                   <Truck className="w-5 h-5 text-black" />
-                  <span>Envío gratis en órdenes de más de 5 artículos</span>
+                  <span>Envío gratis en órdenes de 5 o más artículos</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-500">
                   <ShieldCheck className="w-5 h-5 text-black" />
