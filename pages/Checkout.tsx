@@ -56,25 +56,36 @@ const Checkout: React.FC = () => {
   };
 
   const sendOrderEmail = async (orderCode: string) => {
+      // 1. Format the Items List for Admin readability
+      // Shows: [Qty] Name - Total Price
       const itemsListHtml = cartItems.map(item => 
-          `- ${item.name} (Qty: ${item.quantity}) - ₡${(item.price * item.quantity).toLocaleString('es-CR')}`
-      ).join('\n');
+          `[${item.quantity}] ${item.name} - ₡${(item.price * item.quantity).toLocaleString('es-CR')}`
+      ).join('<br/>');
+
+      // 2. Admin Action Note
+      // This text tells YOU what to check for.
+      let adminNote = 'Payment Method: Credit Card (Integration Pending)';
+      if (paymentMethod === 'sinpe_movil') {
+        adminNote = `ACTION REQUIRED: Customer selected SINPE. Check your bank for a transfer of ₡${total.toLocaleString('es-CR')} from ${formData.name}.`;
+      }
 
       const templateParams = {
-          order_id: orderCode, // Using the code instead of ID
+          order_id: orderCode,
+          order_date: new Date().toLocaleString('es-CR'),
           customer_name: formData.name,
           customer_phone: formData.phone,
-          shipping_address: `${formData.address}, ${formData.district}, ${formData.canton}, ${formData.province}`,
+          shipping_address: `${formData.province}, ${formData.canton}, ${formData.district}. ${formData.address}`,
           order_items: itemsListHtml,
           total_amount: `₡${total.toLocaleString('es-CR')}`,
           payment_method: paymentMethod.toUpperCase().replace('_', ' '),
+          payment_info: adminNote // Sends the Admin Note to your email
       };
 
       try {
           await emailjs.send(EMAIL_SERVICE_ID, EMAIL_TEMPLATE_ID, templateParams, EMAIL_PUBLIC_KEY);
-          console.log("Email sent successfully!");
+          console.log("Admin Alert Sent Successfully!");
       } catch (error) {
-          console.error("Failed to send email:", error);
+          console.error("Failed to send admin alert:", error);
       }
   };
 
@@ -88,7 +99,6 @@ const Checkout: React.FC = () => {
 
       try {
           // 2. Prepare the data payload
-          // Note: 'items' and 'order_code' columns must exist in your Supabase 'orders' table
           const orderPayload = {
               customer_name: formData.name,
               customer_phone: formData.phone,
@@ -104,15 +114,13 @@ const Checkout: React.FC = () => {
           };
 
           // 3. Insert Order (WITHOUT .select())
-          // This avoids the "42501 new row violates row-level security policy" error
-          // because we are not asking to READ the row back, only INSERT it.
           const { error: orderError } = await supabase
               .from('orders')
               .insert([orderPayload]);
 
           if (orderError) throw orderError;
 
-          // 4. Send Email Automation
+          // 4. Send Email Automation (Admin Alert)
           await sendOrderEmail(orderCode);
 
           // 5. Success
