@@ -76,7 +76,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                     ITS27
                   </span>
                   <span className="text-[0.6rem] uppercase tracking-[0.3em] text-gray-500">
-                    Jewelry
+                    Joyería
                   </span>
                 </>
               )}

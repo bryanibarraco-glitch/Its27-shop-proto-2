@@ -9,10 +9,10 @@ const Cart: React.FC = () => {
   if (cartItems.length === 0) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-20 min-h-[60vh] flex flex-col items-center justify-center text-center">
-        <h1 className="text-3xl font-serif font-bold mb-4">Your Cart is Empty</h1>
-        <p className="text-gray-500 mb-8">Looks like you haven't found your perfect piece yet.</p>
+        <h1 className="text-3xl font-serif font-bold mb-4">Tu Carrito está Vacío</h1>
+        <p className="text-gray-500 mb-8">Parece que aún no has encontrado tu pieza perfecta.</p>
         <Link to="/shop" className="bg-black text-white px-8 py-3 uppercase tracking-widest hover:bg-gray-800 transition-colors">
-          Start Shopping
+          Ir a la Tienda
         </Link>
       </div>
     );
@@ -20,7 +20,7 @@ const Cart: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12 md:py-20 min-h-[60vh]">
-      <h1 className="text-3xl font-serif font-bold mb-12">Shopping Cart</h1>
+      <h1 className="text-3xl font-serif font-bold mb-12">Carrito de Compras</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         {/* Cart Items */}
@@ -40,7 +40,7 @@ const Cart: React.FC = () => {
                         <div className="space-y-1">
                           <Link to={`/product/${item.id}`} className="font-serif text-lg hover:underline">{item.name}</Link>
                           {item.quantity > 1 && (
-                               <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                               <p className="text-sm text-gray-500">Cant: {item.quantity}</p>
                           )}
                         </div>
                         <p className="font-light">
@@ -51,7 +51,7 @@ const Cart: React.FC = () => {
                       onClick={() => removeFromCart(item.id)}
                       className="text-gray-400 hover:text-black transition-colors self-start flex items-center gap-2 text-[10px] uppercase tracking-widest"
                      >
-                       <Trash2 className="w-4 h-4" /> Remove
+                       <Trash2 className="w-4 h-4" /> Eliminar
                      </button>
                   </div>
                </div>
@@ -61,15 +61,15 @@ const Cart: React.FC = () => {
 
         {/* Summary */}
         <div className="bg-gray-50 p-8 h-fit lg:sticky lg:top-24">
-           <h3 className="font-serif text-xl mb-6">Order Summary</h3>
+           <h3 className="font-serif text-xl mb-6">Resumen del Pedido</h3>
            <div className="space-y-4 text-sm mb-8">
               <div className="flex justify-between">
                 <span className="text-gray-500">Subtotal</span>
                 <span>{cartTotal.toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 })}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Shipping</span>
-                <span className="text-gray-400">Calculated at checkout</span>
+                <span className="text-gray-500">Envío</span>
+                <span className="text-gray-400">Calculado al finalizar</span>
               </div>
               <div className="flex justify-between pt-4 border-t border-gray-200 font-bold text-lg">
                 <span>Total</span>
@@ -77,10 +77,10 @@ const Cart: React.FC = () => {
               </div>
            </div>
            <Link to="/checkout" className="w-full bg-black text-white py-4 uppercase tracking-widest hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
-             Checkout <ArrowRight className="w-4 h-4" />
+             Finalizar Compra <ArrowRight className="w-4 h-4" />
            </Link>
            <p className="text-xs text-center text-gray-400 mt-4">
-             Secure checkout powered by Stripe
+             Pago Seguro
            </p>
         </div>
       </div>

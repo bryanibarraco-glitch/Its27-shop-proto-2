@@ -47,7 +47,7 @@ const Admin: React.FC = () => {
   // Form State
   const [formData, setFormData] = useState<Partial<Product>>({
     name: '',
-    category: 'Ring',
+    category: 'Anillo',
     price: 0,
     imageId: 101,
     images: [],
@@ -162,7 +162,7 @@ const Admin: React.FC = () => {
     } else {
       setFormData({
         name: '',
-        category: 'Ring',
+        category: 'Anillo',
         price: 0,
         imageId: Math.floor(Math.random() * 100) + 100, 
         images: [],
@@ -626,7 +626,7 @@ const Admin: React.FC = () => {
                                         onChange={e => setFormData({...formData, category: e.target.value})}
                                         className="w-full border border-gray-300 p-3 rounded-sm focus:outline-none focus:border-black"
                                     >
-                                        {['Necklace', 'Ring', 'Earrings', 'Set'].map(c => (
+                                        {['Anillo', 'Collar', 'Aretes', 'Conjunto'].map(c => (
                                             <option key={c} value={c}>{c}</option>
                                         ))}
                                     </select>

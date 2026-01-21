@@ -19,10 +19,10 @@ const AppContent: React.FC = () => {
   const location = useLocation();
 
   const navigationLinks: NavLink[] = [
-    { label: 'Home', path: '/' },
-    { label: 'Shop Collection', path: '/shop' },
-    { label: 'About Us', path: '/about' },
-    { label: 'Contact', path: '/contact' },
+    { label: 'Inicio', path: '/' },
+    { label: 'Colección', path: '/shop' },
+    { label: 'Nosotros', path: '/about' },
+    { label: 'Contacto', path: '/contact' },
   ];
 
   const toggleSidebar = () => {

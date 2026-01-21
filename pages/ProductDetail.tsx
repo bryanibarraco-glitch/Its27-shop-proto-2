@@ -53,9 +53,9 @@ const ProductDetail: React.FC = () => {
   if (!product) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <h1 className="text-2xl font-serif mb-4">Product not found</h1>
+        <h1 className="text-2xl font-serif mb-4">Producto no encontrado</h1>
         <Link to="/shop" className="text-sm uppercase tracking-widest border-b border-black pb-1 hover:opacity-50">
-          Return to Shop
+          Volver a la Tienda
         </Link>
       </div>
     );
@@ -75,7 +75,7 @@ const ProductDetail: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 py-12 md:py-20 animate-fade-in-up">
       <div className="mb-8">
         <Link to="/shop" className="inline-flex items-center gap-2 text-gray-500 hover:text-black transition-colors text-xs uppercase tracking-widest">
-            <ArrowLeft className="w-4 h-4" /> Back to Collection
+            <ArrowLeft className="w-4 h-4" /> Volver a la Colección
         </Link>
       </div>
 
@@ -121,7 +121,7 @@ const ProductDetail: React.FC = () => {
            </div>
            
            <p className="text-gray-600 leading-relaxed font-light text-lg">
-             {product.description || "Handcrafted with precision, this piece embodies the essence of Its27. Made from 100% recycled sterling silver, it features a unique texture that catches the light beautifully. Perfect for everyday wear or special occasions."}
+             {product.description || "Elaborada a mano con precisión, esta pieza encarna la esencia de Its27. Hecha de plata esterlina 100% reciclada, presenta una textura única que atrapa la luz maravillosamente. Perfecta para el uso diario o ocasiones especiales."}
            </p>
 
            <div className="pt-6 space-y-4">
@@ -129,18 +129,18 @@ const ProductDetail: React.FC = () => {
                   onClick={() => addToCart(product)}
                   className="w-full bg-black text-white py-4 uppercase tracking-[0.2em] hover:bg-gray-800 active:scale-[0.99] transition-all flex items-center justify-center gap-3"
                 >
-                    Add to Cart <ArrowRight className="w-4 h-4" />
+                    Agregar al Carrito <ArrowRight className="w-4 h-4" />
                 </button>
            </div>
            
            <div className="pt-8 border-t border-gray-100 grid grid-cols-2 gap-4">
               <div className="flex items-center gap-3 text-sm text-gray-500">
                   <Truck className="w-5 h-5 text-black" />
-                  <span>Free shipping on orders over 5 items</span>
+                  <span>Envío gratis en órdenes de más de 5 artículos</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-500">
                   <ShieldCheck className="w-5 h-5 text-black" />
-                  <span>Lifetime Warranty</span>
+                  <span>Garantía de Por Vida</span>
               </div>
            </div>
         </div>

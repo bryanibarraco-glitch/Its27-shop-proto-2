@@ -4,13 +4,13 @@ import { Search, ChevronDown, SlidersHorizontal, X } from 'lucide-react';
 import { PRODUCTS, Product } from '../data/products';
 import { supabase } from '../lib/supabaseClient';
 
-const CATEGORIES = ['All', 'Necklace', 'Ring', 'Earrings', 'Set'];
+const CATEGORIES = ['Todo', 'Collar', 'Anillo', 'Aretes', 'Conjunto'];
 
 const Shop: React.FC = () => {
   const [dbProducts, setDbProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState('Todo');
   const [sortOption, setSortOption] = useState('featured');
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
 
@@ -49,7 +49,7 @@ const Shop: React.FC = () => {
     }
 
     // 2. Category Filter
-    if (selectedCategory !== 'All') {
+    if (selectedCategory !== 'Todo') {
       result = result.filter(product => product.category === selectedCategory);
     }
 
@@ -68,8 +68,8 @@ const Shop: React.FC = () => {
       
       {/* Header */}
       <div className="text-center py-12 bg-gray-50 mb-12">
-        <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">Shop Collection</h1>
-        <p className="text-gray-500 font-light">Find your perfect piece.</p>
+        <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">Colección</h1>
+        <p className="text-gray-500 font-light">Encuentra tu pieza perfecta.</p>
       </div>
 
       {/* Controls Section */}
@@ -79,7 +79,7 @@ const Shop: React.FC = () => {
         <div className="max-w-md mx-auto relative group">
           <input 
             type="text" 
-            placeholder="Search for jewelry..." 
+            placeholder="Buscar joyería..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-12 pr-4 py-3 bg-transparent border-b border-gray-300 focus:border-black focus:outline-none transition-colors placeholder-gray-400"
@@ -104,8 +104,8 @@ const Shop: React.FC = () => {
                 className="flex items-center gap-2 text-sm uppercase tracking-widest hover:text-gray-600 transition-colors"
             >
                 <SlidersHorizontal className="w-4 h-4" />
-                <span>Filters</span>
-                {selectedCategory !== 'All' && (
+                <span>Filtros</span>
+                {selectedCategory !== 'Todo' && (
                     <span className="flex items-center justify-center w-5 h-5 bg-black text-white text-[10px] rounded-full">1</span>
                 )}
             </button>
@@ -118,9 +118,9 @@ const Shop: React.FC = () => {
                         onChange={(e) => setSortOption(e.target.value)}
                         className="appearance-none bg-transparent py-2 pl-2 pr-8 text-sm uppercase tracking-widest focus:outline-none cursor-pointer text-right"
                     >
-                        <option value="featured">Sort By: Featured</option>
-                        <option value="price-desc">Price: High to Low</option>
-                        <option value="price-asc">Price: Low to High</option>
+                        <option value="featured">Ordenar: Destacados</option>
+                        <option value="price-desc">Precio: Mayor a Menor</option>
+                        <option value="price-asc">Precio: Menor a Mayor</option>
                     </select>
                     <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
                 </div>
@@ -131,13 +131,13 @@ const Shop: React.FC = () => {
         {isFilterMenuOpen && (
             <div className="py-8 bg-gray-50/50 px-4 rounded-lg animate-fade-in-up">
                 <div className="flex justify-between items-end mb-4">
-                    <p className="text-xs uppercase tracking-widest text-gray-400">Category</p>
-                    {selectedCategory !== 'All' && (
+                    <p className="text-xs uppercase tracking-widest text-gray-400">Categoría</p>
+                    {selectedCategory !== 'Todo' && (
                          <button 
-                            onClick={() => setSelectedCategory('All')} 
+                            onClick={() => setSelectedCategory('Todo')} 
                             className="text-xs uppercase tracking-widest text-red-500 border-b border-red-500 pb-0.5"
                          >
-                            Reset
+                            Restablecer
                          </button>
                     )}
                 </div>
@@ -164,7 +164,7 @@ const Shop: React.FC = () => {
       {loading ? (
         <div className="text-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
-            <p className="mt-4 text-sm text-gray-400 uppercase tracking-widest">Loading Collection...</p>
+            <p className="mt-4 text-sm text-gray-400 uppercase tracking-widest">Cargando Colección...</p>
         </div>
       ) : filteredProducts.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
@@ -184,7 +184,7 @@ const Shop: React.FC = () => {
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300"></div>
                         <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                             <button className="w-full bg-white text-black py-2 text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
-                                View Details
+                                Ver Detalles
                             </button>
                         </div>
                     </Link>
@@ -202,19 +202,19 @@ const Shop: React.FC = () => {
         </div>
       ) : (
           <div className="text-center py-20">
-              <p className="text-xl text-gray-400 font-serif italic">No products found matching your selection.</p>
+              <p className="text-xl text-gray-400 font-serif italic">No se encontraron productos.</p>
               <button 
-                onClick={() => {setSearchQuery(''); setSelectedCategory('All');}}
+                onClick={() => {setSearchQuery(''); setSelectedCategory('Todo');}}
                 className="mt-4 text-sm uppercase tracking-widest border-b border-black pb-0.5 hover:text-gray-600 hover:border-gray-600"
               >
-                  Clear Filters
+                  Limpiar Filtros
               </button>
           </div>
       )}
       
       {!loading && filteredProducts.length > 0 && (
         <div className="flex justify-center mt-20 mb-12">
-            <span className="text-xs text-gray-400 uppercase tracking-widest">Showing {filteredProducts.length} products</span>
+            <span className="text-xs text-gray-400 uppercase tracking-widest">Mostrando {filteredProducts.length} productos</span>
         </div>
       )}
     </div>

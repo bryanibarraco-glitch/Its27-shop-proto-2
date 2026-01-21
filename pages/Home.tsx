@@ -6,10 +6,10 @@ import { supabase } from '../lib/supabaseClient';
 
 // Default Content Fallback
 const DEFAULT_HERO = {
-  title: "Timeless Elegance",
-  subtitle: "New Collection 2024",
-  description: "Discover the beauty of handcrafted simplicity. Designed for the modern muse.",
-  buttonText: "Shop Collection",
+  title: "Elegancia Atemporal",
+  subtitle: "Nueva Colección 2024",
+  description: "Descubre la belleza de la simplicidad artesanal. Diseñado para la musa moderna.",
+  buttonText: "Ver Colección",
   imageUrl: "https://picsum.photos/1920/1080?grayscale&blur=2"
 };
 
@@ -182,7 +182,7 @@ const Home: React.FC = () => {
             onClick={() => setIsEditModalOpen(true)}
             className="fixed bottom-6 left-6 z-50 bg-black text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 hover:scale-105 transition-transform uppercase tracking-widest text-xs font-bold"
           >
-              <Edit3 className="w-4 h-4" /> Customize Site
+              <Edit3 className="w-4 h-4" /> Personalizar Sitio
           </button>
       )}
 
@@ -222,7 +222,7 @@ const Home: React.FC = () => {
       <section className="py-24 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-             <h3 className="text-3xl font-serif font-bold mb-4">Curated Favorites</h3>
+             <h3 className="text-3xl font-serif font-bold mb-4">Favoritos</h3>
              <div className="w-16 h-0.5 bg-black mx-auto"></div>
           </div>
           
@@ -252,7 +252,7 @@ const Home: React.FC = () => {
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                                 <div className="absolute bottom-4 left-4 right-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                                     <button className="w-full bg-white text-black py-3 text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
-                                    Quick View
+                                    Vista Rápida
                                     </button>
                                 </div>
                                 </div>
@@ -270,7 +270,7 @@ const Home: React.FC = () => {
             
             {featuredProducts.length === 0 && (
                 <div className="col-span-3 text-center text-gray-400 py-10">
-                    No curated products selected.
+                    No hay productos seleccionados.
                 </div>
             )}
           </div>
@@ -284,22 +284,22 @@ const Home: React.FC = () => {
               <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4">
                 <Star className="w-6 h-6" />
               </div>
-              <h4 className="text-lg font-bold uppercase tracking-wide">Premium Quality</h4>
-              <p className="text-gray-500 font-light">Ethically sourced materials and expert craftsmanship in every piece.</p>
+              <h4 className="text-lg font-bold uppercase tracking-wide">Calidad Premium</h4>
+              <p className="text-gray-500 font-light">Materiales de origen ético y artesanía experta en cada pieza.</p>
             </div>
             <div className="space-y-4">
               <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="font-serif text-xl italic">27</span>
               </div>
-              <h4 className="text-lg font-bold uppercase tracking-wide">Unique Design</h4>
-              <p className="text-gray-500 font-light">Distinctive styles that stand out from the crowd, made for you.</p>
+              <h4 className="text-lg font-bold uppercase tracking-wide">Diseño Único</h4>
+              <p className="text-gray-500 font-light">Estilos distintivos que destacan entre la multitud, hechos para ti.</p>
             </div>
             <div className="space-y-4">
               <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4">
                  <ArrowRight className="w-6 h-6 -rotate-45" />
               </div>
-              <h4 className="text-lg font-bold uppercase tracking-wide">Lifetime Warranty</h4>
-              <p className="text-gray-500 font-light">We stand behind our jewelry forever. Experience worry-free luxury.</p>
+              <h4 className="text-lg font-bold uppercase tracking-wide">Garantía de Por Vida</h4>
+              <p className="text-gray-500 font-light">Respaldamos nuestra joyería para siempre. Experimenta el lujo sin preocupaciones.</p>
             </div>
         </div>
       </section>
@@ -309,12 +309,12 @@ const Home: React.FC = () => {
          <div className="max-w-7xl mx-auto flex flex-col items-center space-y-8">
             <h2 className="text-3xl font-serif font-bold tracking-widest">ITS27</h2>
             <nav className="flex flex-wrap justify-center gap-8 text-sm text-gray-400 uppercase tracking-widest">
-              <Link to="/" className="hover:text-white transition-colors">Home</Link>
-              <Link to="/shop" className="hover:text-white transition-colors">Shop</Link>
-              <Link to="/about" className="hover:text-white transition-colors">About</Link>
-              <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
+              <Link to="/" className="hover:text-white transition-colors">Inicio</Link>
+              <Link to="/shop" className="hover:text-white transition-colors">Tienda</Link>
+              <Link to="/about" className="hover:text-white transition-colors">Nosotros</Link>
+              <Link to="/contact" className="hover:text-white transition-colors">Contacto</Link>
             </nav>
-            <p className="text-xs text-gray-600 pt-8">© 2024 Its27 Jewelry. All rights reserved.</p>
+            <p className="text-xs text-gray-600 pt-8">© 2024 Its27 Jewelry. Todos los derechos reservados.</p>
          </div>
       </footer>
 
@@ -325,7 +325,7 @@ const Home: React.FC = () => {
                   
                   {/* Header */}
                   <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-                      <h2 className="text-xl font-serif font-bold">Customize Site</h2>
+                      <h2 className="text-xl font-serif font-bold">Personalizar Sitio</h2>
                       <button onClick={() => setIsEditModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-full">
                           <X className="w-5 h-5" />
                       </button>
@@ -336,20 +336,20 @@ const Home: React.FC = () => {
                       
                       {/* Section: Global Settings */}
                       <div className="space-y-4">
-                          <h3 className="text-xs uppercase tracking-widest text-gray-400 font-bold border-b pb-2">Global Settings</h3>
+                          <h3 className="text-xs uppercase tracking-widest text-gray-400 font-bold border-b pb-2">Configuración Global</h3>
                           
                           <div>
-                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Header Logo</label>
+                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Logo</label>
                               <div className="flex items-center gap-4">
                                   {/* UPDATED: Wider container for rectangular logos */}
                                   <div className="w-64 h-24 bg-gray-100 rounded-sm overflow-hidden flex items-center justify-center border border-gray-200 relative group">
                                       {logoUrl ? (
                                           <img src={logoUrl} className="max-w-full max-h-full object-contain p-2" alt="Logo" />
                                       ) : (
-                                          <span className="text-xs text-gray-400">No Logo</span>
+                                          <span className="text-xs text-gray-400">Sin Logo</span>
                                       )}
                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                                           <p className="text-white text-[10px] font-bold uppercase">Upload</p>
+                                           <p className="text-white text-[10px] font-bold uppercase">Subir</p>
                                       </div>
                                       <input 
                                         type="file" 
@@ -359,19 +359,19 @@ const Home: React.FC = () => {
                                       />
                                   </div>
                                   {logoUrl && (
-                                      <button onClick={() => setLogoUrl('')} className="text-xs text-red-500 hover:text-red-700 underline">Remove</button>
+                                      <button onClick={() => setLogoUrl('')} className="text-xs text-red-500 hover:text-red-700 underline">Eliminar</button>
                                   )}
                               </div>
-                              <p className="text-[10px] text-gray-400 mt-1">Recommended: Transparent PNG, wider format supported.</p>
+                              <p className="text-[10px] text-gray-400 mt-1">Recomendado: PNG Transparente.</p>
                           </div>
                       </div>
 
                       {/* Section: Hero */}
                       <div className="space-y-4">
-                          <h3 className="text-xs uppercase tracking-widest text-gray-400 font-bold border-b pb-2">Hero Section</h3>
+                          <h3 className="text-xs uppercase tracking-widest text-gray-400 font-bold border-b pb-2">Sección Hero</h3>
                           
                            <div>
-                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Upper Text</label>
+                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Texto Superior</label>
                               <input 
                                 type="text"
                                 value={heroConfig.subtitle} 
@@ -381,7 +381,7 @@ const Home: React.FC = () => {
                           </div>
                           
                           <div>
-                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Title</label>
+                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Título</label>
                               <textarea 
                                 rows={2}
                                 value={heroConfig.title} 
@@ -391,7 +391,7 @@ const Home: React.FC = () => {
                           </div>
 
                           <div>
-                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Lower Text</label>
+                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Texto Inferior</label>
                               <textarea 
                                 rows={3}
                                 value={heroConfig.description} 
@@ -401,11 +401,21 @@ const Home: React.FC = () => {
                           </div>
 
                           <div>
-                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Background Image</label>
+                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Texto del Botón</label>
+                              <input 
+                                type="text"
+                                value={heroConfig.buttonText} 
+                                onChange={(e) => setHeroConfig({...heroConfig, buttonText: e.target.value})}
+                                className="w-full border border-gray-300 p-2 text-sm rounded-sm focus:border-black outline-none"
+                              />
+                          </div>
+
+                          <div>
+                              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Imagen de Fondo</label>
                               <div className="relative h-32 bg-gray-100 rounded-sm overflow-hidden group mb-2">
                                   <img src={heroConfig.imageUrl} className="w-full h-full object-cover" alt="Hero" />
                                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <p className="text-white text-xs font-bold uppercase">Change Image</p>
+                                      <p className="text-white text-xs font-bold uppercase">Cambiar Imagen</p>
                                   </div>
                                   <input 
                                     type="file" 
@@ -414,15 +424,15 @@ const Home: React.FC = () => {
                                     className="absolute inset-0 opacity-0 cursor-pointer"
                                   />
                               </div>
-                              <p className="text-[10px] text-gray-400">Recommended: 1920x1080px (Landscape)</p>
+                              <p className="text-[10px] text-gray-400">Recomendado: 1920x1080px (Landscape)</p>
                           </div>
                       </div>
 
                       {/* Section: Featured */}
                       <div className="space-y-4">
                           <div className="flex justify-between items-center border-b pb-2">
-                            <h3 className="text-xs uppercase tracking-widest text-gray-400 font-bold">Curated Favorites</h3>
-                            <span className="text-xs font-bold">{featuredIds.length} / 3 Selected</span>
+                            <h3 className="text-xs uppercase tracking-widest text-gray-400 font-bold">Favoritos</h3>
+                            <span className="text-xs font-bold">{featuredIds.length} / 3 Seleccionados</span>
                           </div>
 
                           <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
@@ -460,7 +470,7 @@ const Home: React.FC = () => {
                         className="w-full bg-black text-white py-4 uppercase tracking-widest hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
                       >
                           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                          Save Changes
+                          Guardar Cambios
                       </button>
                   </div>
               </div>

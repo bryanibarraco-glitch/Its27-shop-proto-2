@@ -3,41 +3,41 @@ import React from 'react';
 const Contact: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto px-4 py-20">
-      <h1 className="text-4xl font-serif font-bold text-center mb-4">Get in Touch</h1>
+      <h1 className="text-4xl font-serif font-bold text-center mb-4">Contáctanos</h1>
       <p className="text-center text-gray-500 mb-12 font-light">
-        Have a question or just want to say hello? We'd love to hear from you.
+        ¿Tienes una pregunta o simplemente quieres saludar? Nos encantaría saber de ti.
       </p>
 
       <form className="space-y-8 animate-fade-in-up" onSubmit={(e) => e.preventDefault()}>
         <div>
-          <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Name</label>
+          <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Nombre</label>
           <input 
             type="text" 
             className="w-full border-b border-gray-300 py-3 focus:outline-none focus:border-black transition-colors bg-transparent" 
-            placeholder="Jane Doe"
+            placeholder="Ana Rodríguez"
           />
         </div>
         
         <div>
-          <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Email</label>
+          <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Correo Electrónico</label>
           <input 
             type="email" 
             className="w-full border-b border-gray-300 py-3 focus:outline-none focus:border-black transition-colors bg-transparent" 
-            placeholder="jane@example.com"
+            placeholder="ana@ejemplo.com"
           />
         </div>
         
         <div>
-          <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Message</label>
+          <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Mensaje</label>
           <textarea 
             rows={5} 
             className="w-full border-b border-gray-300 py-3 focus:outline-none focus:border-black transition-colors bg-transparent resize-none"
-            placeholder="How can we help you?"
+            placeholder="¿Cómo podemos ayudarte?"
           ></textarea>
         </div>
 
         <button className="w-full bg-black text-white py-4 uppercase tracking-[0.2em] text-sm hover:bg-gray-800 transition-colors">
-          Send Message
+          Enviar Mensaje
         </button>
       </form>
 

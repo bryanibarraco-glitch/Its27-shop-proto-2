@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { NavLink } from '../types';
@@ -30,7 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, links }) => {
       >
         <div className="flex flex-col h-full">
           <div className="flex justify-between items-center p-6 border-b border-gray-100">
-            <h2 className="text-xl font-serif font-bold tracking-wider">MENU</h2>
+            <h2 className="text-xl font-serif font-bold tracking-wider">MENÚ</h2>
             <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
               <X className="w-6 h-6" />
             </button>
@@ -61,7 +61,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, links }) => {
 
           <div className="p-8 border-t border-gray-100">
             <p className="text-sm text-gray-400 uppercase tracking-widest text-center">
-              Its27 Jewelry Collection
+              Colección Joyería Its27
             </p>
           </div>
         </div>

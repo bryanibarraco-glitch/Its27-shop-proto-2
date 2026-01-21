@@ -134,8 +134,8 @@ const Checkout: React.FC = () => {
 
       } catch (error: any) {
           console.error("Error placing order:", error);
-          const msg = error.message || 'Please check your information and try again.';
-          alert(`Order failed: ${msg}`);
+          const msg = error.message || 'Por favor verifica tu información e intenta de nuevo.';
+          alert(`Error en el Pedido: ${msg}`);
           setErrorMsg(msg);
       } finally {
           setIsSubmitting(false);
@@ -146,7 +146,7 @@ const Checkout: React.FC = () => {
     <div className="max-w-4xl mx-auto px-4 py-12 md:py-20 animate-fade-in-up relative">
         {/* Back link */}
         <Link to="/cart" className="inline-flex items-center gap-2 text-gray-500 hover:text-black mb-8 transition-colors text-sm uppercase tracking-widest">
-            <ArrowLeft className="w-4 h-4" /> Back to Cart
+            <ArrowLeft className="w-4 h-4" /> Volver al Carrito
         </Link>
 
         {/* Marketing Banner */}
@@ -155,11 +155,11 @@ const Checkout: React.FC = () => {
                 <div className="flex items-center gap-3">
                     <Gift className="w-5 h-5 text-gray-300" />
                     <p className="text-sm font-medium">
-                        Add <span className="font-bold text-white underline decoration-1 underline-offset-4">{itemsNeededForFreeShipping} more item{itemsNeededForFreeShipping > 1 ? 's' : ''}</span> to unlock <span className="font-bold">FREE SHIPPING</span>!
+                        Agrega <span className="font-bold text-white underline decoration-1 underline-offset-4">{itemsNeededForFreeShipping} artículo{itemsNeededForFreeShipping > 1 ? 's' : ''} más</span> para tener <span className="font-bold">ENVÍO GRATIS</span>!
                     </p>
                 </div>
                 <Link to="/shop" className="text-xs uppercase tracking-widest bg-white text-black px-4 py-2 hover:bg-gray-200 transition-colors whitespace-nowrap">
-                    Continue Shopping
+                    Seguir Comprando
                 </Link>
              </div>
         )}
@@ -167,18 +167,18 @@ const Checkout: React.FC = () => {
         {isFreeShipping && (
             <div className="bg-green-50 text-green-800 border border-green-100 p-4 mb-8 flex items-center gap-3 animate-fade-in">
                 <Gift className="w-5 h-5" />
-                <p className="text-sm font-medium">Congratulations! You've unlocked <span className="font-bold">FREE SHIPPING</span>.</p>
+                <p className="text-sm font-medium">¡Felicidades! Tienes <span className="font-bold">ENVÍO GRATIS</span>.</p>
             </div>
         )}
 
-        <h1 className="text-3xl font-serif font-bold mb-8">Checkout</h1>
+        <h1 className="text-3xl font-serif font-bold mb-8">Finalizar Compra</h1>
 
         {/* Error Display */}
         {errorMsg && (
             <div className="bg-red-50 text-red-700 p-4 mb-8 rounded-md border border-red-100 flex items-start gap-3 animate-fade-in">
                 <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                    <h3 className="font-bold text-sm">Order Failed</h3>
+                    <h3 className="font-bold text-sm">Error en el Pedido</h3>
                     <p className="text-sm mt-1">{errorMsg}</p>
                 </div>
             </div>
@@ -194,47 +194,47 @@ const Checkout: React.FC = () => {
                     <section>
                         <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
                             <Truck className="w-5 h-5" />
-                            <h2 className="text-xl font-serif font-bold">Shipping Information</h2>
+                            <h2 className="text-xl font-serif font-bold">Información de Envío</h2>
                         </div>
                         
                         <div className="bg-gray-50 p-4 mb-6 rounded-sm border border-gray-100 text-sm text-gray-600">
                             <p className="flex items-center gap-2">
                                 <CheckCircle className="w-4 h-4 text-green-600" />
-                                Shipping handled securely by <span className="font-bold text-black">Correos de Costa Rica</span>.
+                                Envíos seguros por <span className="font-bold text-black">Correos de Costa Rica</span>.
                             </p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="md:col-span-2">
-                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Full Name</label>
+                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Nombre Completo</label>
                                 <input name="name" onChange={handleInputChange} type="text" className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors" placeholder="Juan Pérez" required />
                             </div>
                             
                             <div className="md:col-span-2">
-                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Phone Number</label>
+                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Número de Teléfono</label>
                                 <input name="phone" onChange={handleInputChange} type="tel" className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors" placeholder="8888-8888" required />
                             </div>
 
                             <div>
-                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Province (Provincia)</label>
+                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Provincia</label>
                                 <select name="province" onChange={handleInputChange} className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors cursor-pointer" required>
-                                    <option value="">Select Province</option>
+                                    <option value="">Seleccionar Provincia</option>
                                     {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
                                 </select>
                             </div>
 
                             <div>
-                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Canton</label>
+                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Cantón</label>
                                 <input name="canton" onChange={handleInputChange} type="text" className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors" placeholder="Escazú" required />
                             </div>
 
                             <div>
-                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">District (Distrito)</label>
+                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Distrito</label>
                                 <input name="district" onChange={handleInputChange} type="text" className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors" placeholder="San Rafael" required />
                             </div>
 
                             <div className="md:col-span-2">
-                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Exact Address (Dirección Exacta)</label>
+                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Dirección Exacta</label>
                                 <textarea name="address" onChange={handleInputChange} rows={3} className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors resize-none" placeholder="Frente al parque, casa blanca..." required></textarea>
                             </div>
                         </div>
@@ -245,7 +245,7 @@ const Checkout: React.FC = () => {
                 <section>
                      <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
                         <CreditCard className="w-5 h-5" />
-                        <h2 className="text-xl font-serif font-bold">Payment Method</h2>
+                        <h2 className="text-xl font-serif font-bold">Método de Pago</h2>
                     </div>
 
                     <div className="space-y-4">
@@ -263,9 +263,9 @@ const Checkout: React.FC = () => {
                             
                             {paymentMethod === 'sinpe_movil' && (
                                 <div className="ml-7 mt-3 text-sm text-gray-600 animate-fade-in">
-                                    <p className="mb-2">Please make your transfer to:</p>
+                                    <p className="mb-2">Por favor realiza el SINPE al:</p>
                                     <p className="text-xl font-bold text-black tracking-wider">6221-4479</p>
-                                    <p className="mt-2 text-xs">Send proof of payment to our WhatsApp after placing your order.</p>
+                                    <p className="mt-2 text-xs">Envía el comprobante a nuestro WhatsApp después de realizar el pedido.</p>
                                 </div>
                             )}
                         </div>
@@ -279,12 +279,12 @@ const Checkout: React.FC = () => {
                                 <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === 'credit_card' ? 'border-black' : 'border-gray-300'}`}>
                                     {paymentMethod === 'credit_card' && <div className="w-2 h-2 rounded-full bg-black"></div>}
                                 </div>
-                                <span className="font-bold flex items-center gap-2"> <CreditCard className="w-4 h-4" /> Credit Card</span>
+                                <span className="font-bold flex items-center gap-2"> <CreditCard className="w-4 h-4" /> Tarjeta de Crédito</span>
                             </div>
 
                              {paymentMethod === 'credit_card' && (
                                 <div className="ml-7 mt-3 text-sm text-gray-500 animate-fade-in italic">
-                                    Payment processor integration pending.
+                                    Procesador de pagos pendiente de integración.
                                 </div>
                             )}
                         </div>
@@ -297,15 +297,15 @@ const Checkout: React.FC = () => {
                     className="w-full bg-black text-white py-4 uppercase tracking-[0.2em] hover:bg-gray-800 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                     {isSubmitting ? (
-                        <>Processing <Loader2 className="w-4 h-4 animate-spin" /></>
-                    ) : 'Place Order'}
+                        <>Procesando <Loader2 className="w-4 h-4 animate-spin" /></>
+                    ) : 'Realizar Pedido'}
                 </button>
             </div>
 
             {/* Order Summary Sidebar */}
             <div className="lg:col-span-1">
                 <div className="bg-gray-50 p-6 sticky top-24">
-                     <h3 className="font-serif text-lg font-bold mb-4">Order Summary</h3>
+                     <h3 className="font-serif text-lg font-bold mb-4">Resumen del Pedido</h3>
                      
                      <div className="space-y-4 mb-6 max-h-[300px] overflow-y-auto custom-scrollbar">
                         {cartItems.map((item, index) => (
@@ -322,10 +322,10 @@ const Checkout: React.FC = () => {
                              <span>{cartTotal.toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 })}</span>
                          </div>
                          <div className="flex justify-between text-gray-500">
-                             <span>Shipping (Correos)</span>
+                             <span>Envío (Correos)</span>
                              <span className={isFreeShipping ? "text-green-600 font-bold" : ""}>
                                  {isFreeShipping 
-                                    ? "FREE" 
+                                    ? "GRATIS" 
                                     : shippingCost.toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 })}
                              </span>
                          </div>
@@ -348,28 +348,28 @@ const Checkout: React.FC = () => {
                     
                     <div>
                         <h2 className="text-3xl font-serif font-bold text-gray-900 mb-2">
-                            Gracias por tu compra!
+                            ¡Gracias por tu compra!
                         </h2>
                         <p className="text-gray-500 font-light">
-                            We have received your order.
+                            Hemos recibido tu pedido.
                         </p>
                     </div>
                     
                     <div className="bg-gray-50 p-4 rounded-md border border-gray-100">
-                        <p className="text-xs uppercase tracking-widest text-gray-500 mb-1">Order Reference</p>
+                        <p className="text-xs uppercase tracking-widest text-gray-500 mb-1">Referencia del Pedido</p>
                         <p className="font-mono font-bold text-xl text-black">{finalOrderCode}</p>
                     </div>
                     
                     <p className="text-sm text-gray-500">
-                        A confirmation email has been sent to the store admin. <br/> 
-                        <span className="text-xs italic"> (Customer receipt is sent if configured)</span>
+                        Se ha enviado un correo de confirmación al administrador. <br/> 
+                        <span className="text-xs italic"> (El recibo del cliente se envía si está configurado)</span>
                     </p>
 
                     <button 
                         onClick={() => navigate('/')}
                         className="w-full bg-black text-white py-4 uppercase tracking-widest hover:bg-gray-800 transition-colors shadow-lg"
                     >
-                        Continue Shopping
+                        Seguir Comprando
                     </button>
                 </div>
             </div>
