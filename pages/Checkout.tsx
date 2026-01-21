@@ -3,10 +3,16 @@ import { ArrowLeft, CreditCard, Smartphone, Truck, CheckCircle, Gift, Loader2 } 
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabaseClient';
+import emailjs from '@emailjs/browser';
 
 const PROVINCES = [
   'San José', 'Alajuela', 'Cartago', 'Heredia', 'Guanacaste', 'Puntarenas', 'Limón'
 ];
+
+// --- EMAILJS CONFIGURATION ---
+const EMAIL_SERVICE_ID = 'service_gbzwvkp'; 
+const EMAIL_TEMPLATE_ID = 'template_hszdk4s';
+const EMAIL_PUBLIC_KEY = '1-44LVx0fgEwJCGMb';
 
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
@@ -28,11 +34,38 @@ const Checkout: React.FC = () => {
       province: '',
       canton: '',
       district: '',
-      address: ''
+      address: '',
+      email: '' 
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const sendOrderEmail = async (orderId: number) => {
+      // 1. Format the items list for the email
+      const itemsListHtml = cartItems.map(item => 
+          `- ${item.name} (Qty: ${item.quantity}) - ₡${(item.price * item.quantity).toLocaleString('es-CR')}`
+      ).join('\n');
+
+      const templateParams = {
+          order_id: orderId,
+          customer_name: formData.name,
+          customer_email: formData.email,
+          customer_phone: formData.phone,
+          shipping_address: `${formData.address}, ${formData.district}, ${formData.canton}, ${formData.province}`,
+          order_items: itemsListHtml,
+          total_amount: `₡${total.toLocaleString('es-CR')}`,
+          payment_method: paymentMethod.toUpperCase(),
+      };
+
+      try {
+          await emailjs.send(EMAIL_SERVICE_ID, EMAIL_TEMPLATE_ID, templateParams, EMAIL_PUBLIC_KEY);
+          console.log("Email sent successfully!");
+      } catch (error) {
+          console.error("Failed to send email:", error);
+          // We do not stop the order process if email fails, just log it.
+      }
   };
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
@@ -52,7 +85,8 @@ const Checkout: React.FC = () => {
                       district: formData.district,
                       address: formData.address,
                       total_amount: total,
-                      payment_method: paymentMethod
+                      payment_method: paymentMethod,
+                      status: 'pending' // Ensure default status
                   }
               ])
               .select()
@@ -74,12 +108,15 @@ const Checkout: React.FC = () => {
                   .insert(orderItems);
               
               if (itemsError) throw itemsError;
-          }
 
-          // 3. Success & Clean up
-          clearCart();
-          alert(`Order #${orderData.id} placed successfully! Check your email/WhatsApp.`);
-          navigate('/');
+              // 3. Send Email Automation
+              await sendOrderEmail(orderData.id);
+
+              // 4. Success & Clean up
+              clearCart();
+              alert(`Order #${orderData.id} placed successfully!`);
+              navigate('/');
+          }
 
       } catch (error) {
           console.error("Error placing order:", error);
@@ -144,6 +181,11 @@ const Checkout: React.FC = () => {
                             <div className="md:col-span-2">
                                 <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Full Name</label>
                                 <input name="name" onChange={handleInputChange} type="text" className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors" placeholder="Juan Pérez" required />
+                            </div>
+
+                             <div className="md:col-span-2">
+                                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Email Address</label>
+                                <input name="email" onChange={handleInputChange} type="email" className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black focus:outline-none transition-colors" placeholder="juan@example.com" required />
                             </div>
                             
                             <div className="md:col-span-2">
