@@ -1,31 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Package, Plus, Trash2, Edit2, LogOut, Save, X, Image as ImageIcon, Upload, Loader2, Star, ChevronLeft, ChevronRight, ShoppingBag, Eye, Truck, CheckCircle, MessageSquare, Mail } from 'lucide-react';
+import { Package, Plus, Trash2, Edit2, LogOut, Save, X, Upload, Loader2, Star, ChevronLeft, ChevronRight, MessageSquare, Mail } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { Product } from '../data/products';
-
-// Interface for Order Data
-interface OrderItem {
-  id: number;
-  product_id: number;
-  quantity: number;
-  price_at_purchase: number;
-  products?: Product; // Joined data
-}
-
-interface Order {
-  id: number;
-  created_at: string;
-  customer_name: string;
-  customer_phone: string;
-  province: string;
-  canton: string;
-  district: string;
-  address: string;
-  total_amount: number;
-  payment_method: string;
-  status: 'pending' | 'shipped' | 'delivered' | 'cancelled';
-  order_items?: OrderItem[];
-}
 
 interface ContactMessage {
   id: number;
@@ -41,7 +17,7 @@ const Admin: React.FC = () => {
   const [loading, setLoading] = useState(true);
   
   // Dashboard State
-  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'messages'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'messages'>('products');
   
   // Product State
   const [products, setProducts] = useState<Product[]>([]);
@@ -49,10 +25,6 @@ const Admin: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
   
-  // Order State
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-
   // Messages State
   const [messages, setMessages] = useState<ContactMessage[]>([]);
 
@@ -77,7 +49,6 @@ const Admin: React.FC = () => {
       setSession(session);
       if (session) {
           fetchProducts();
-          fetchOrders();
           fetchMessages();
       }
       setLoading(false);
@@ -89,7 +60,6 @@ const Admin: React.FC = () => {
       setSession(session);
       if (session) {
           fetchProducts();
-          fetchOrders();
           fetchMessages();
       }
     });
@@ -108,23 +78,6 @@ const Admin: React.FC = () => {
     else setProducts(data || []);
   };
 
-  const fetchOrders = async () => {
-    const { data, error } = await supabase
-        .from('orders')
-        .select(`
-            *,
-            order_items (
-                quantity,
-                price_at_purchase,
-                products ( name, images )
-            )
-        `)
-        .order('created_at', { ascending: false });
-
-    if (error) console.error('Error fetching orders:', error);
-    else setOrders((data as any) || []);
-  };
-
   const fetchMessages = async () => {
     const { data, error } = await supabase
       .from('contact_messages')
@@ -140,22 +93,6 @@ const Admin: React.FC = () => {
       const { error } = await supabase.from('contact_messages').delete().eq('id', id);
       if(error) alert("Error deleting message");
       else fetchMessages();
-  };
-
-  const updateOrderStatus = async (orderId: number, newStatus: string) => {
-      const { error } = await supabase
-          .from('orders')
-          .update({ status: newStatus })
-          .eq('id', orderId);
-      
-      if (error) {
-          alert("Failed to update status");
-      } else {
-          fetchOrders();
-          if (selectedOrder && selectedOrder.id === orderId) {
-              setSelectedOrder(prev => prev ? { ...prev, status: newStatus as any } : null);
-          }
-      }
   };
 
   // 3. Auth Functions
@@ -176,7 +113,6 @@ const Admin: React.FC = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setProducts([]);
-    setOrders([]);
     setMessages([]);
   };
 
@@ -393,26 +329,6 @@ const Admin: React.FC = () => {
                     <p className="text-2xl font-bold">{products.length}</p>
                 </div>
             </div>
-             <div className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-4">
-                <div className="p-3 bg-black/5 rounded-full">
-                    <ShoppingBag className="w-6 h-6 text-black" />
-                </div>
-                <div>
-                    <p className="text-sm text-gray-500 uppercase tracking-wide">Total Orders</p>
-                    <p className="text-2xl font-bold">{orders.length}</p>
-                </div>
-            </div>
-             <div className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-4">
-                <div className="p-3 bg-black/5 rounded-full">
-                    <CheckCircle className="w-6 h-6 text-green-600" />
-                </div>
-                <div>
-                    <p className="text-sm text-gray-500 uppercase tracking-wide">Pending Orders</p>
-                    <p className="text-2xl font-bold text-orange-500">
-                        {orders.filter(o => o.status === 'pending').length}
-                    </p>
-                </div>
-            </div>
             <div className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-4">
                 <div className="p-3 bg-black/5 rounded-full">
                     <MessageSquare className="w-6 h-6 text-blue-600" />
@@ -431,12 +347,6 @@ const Admin: React.FC = () => {
                 className={`pb-4 text-sm uppercase tracking-widest font-bold transition-colors ${activeTab === 'products' ? 'border-b-2 border-black text-black' : 'text-gray-400 hover:text-gray-600'}`}
              >
                  Products
-             </button>
-             <button 
-                onClick={() => setActiveTab('orders')}
-                className={`pb-4 text-sm uppercase tracking-widest font-bold transition-colors ${activeTab === 'orders' ? 'border-b-2 border-black text-black' : 'text-gray-400 hover:text-gray-600'}`}
-             >
-                 Orders
              </button>
              <button 
                 onClick={() => setActiveTab('messages')}
@@ -504,68 +414,6 @@ const Admin: React.FC = () => {
                                         </tr>
                                     );
                                 })}
-                            </tbody>
-                        </table>
-                    </div>
-                </>
-            )}
-
-            {/* ORDERS TAB */}
-            {activeTab === 'orders' && (
-                <>
-                    <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                        <h2 className="text-xl font-bold font-serif">Recent Orders</h2>
-                        <button onClick={fetchOrders} className="text-xs uppercase tracking-widest hover:underline">Refresh</button>
-                    </div>
-                    
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead className="bg-gray-50 text-xs uppercase tracking-widest text-gray-500">
-                                <tr>
-                                    <th className="p-4">Order ID</th>
-                                    <th className="p-4">Date</th>
-                                    <th className="p-4">Customer</th>
-                                    <th className="p-4">Status</th>
-                                    <th className="p-4">Total</th>
-                                    <th className="p-4 text-right">Details</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {orders.map((order) => {
-                                    const date = new Date(order.created_at).toLocaleDateString('es-CR');
-                                    let statusColor = "bg-gray-100 text-gray-600";
-                                    if(order.status === 'shipped') statusColor = "bg-blue-100 text-blue-800";
-                                    if(order.status === 'delivered') statusColor = "bg-green-100 text-green-800";
-                                    if(order.status === 'cancelled') statusColor = "bg-red-100 text-red-800";
-                                    if(order.status === 'pending') statusColor = "bg-yellow-100 text-yellow-800";
-
-                                    return (
-                                        <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
-                                            <td className="p-4 font-mono text-sm">#{order.id}</td>
-                                            <td className="p-4 text-sm text-gray-500">{date}</td>
-                                            <td className="p-4 font-medium">{order.customer_name}</td>
-                                            <td className="p-4">
-                                                <span className={`px-2 py-1 rounded-full text-xs uppercase tracking-wide font-bold ${statusColor}`}>
-                                                    {order.status || 'Pending'}
-                                                </span>
-                                            </td>
-                                            <td className="p-4 text-sm font-bold">₡{order.total_amount.toLocaleString('es-CR')}</td>
-                                            <td className="p-4 text-right">
-                                                <button 
-                                                    onClick={() => setSelectedOrder(order)}
-                                                    className="flex items-center gap-1 text-xs uppercase tracking-widest bg-black text-white px-3 py-1.5 ml-auto hover:bg-gray-800"
-                                                >
-                                                    <Eye className="w-3 h-3" /> View
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                                {orders.length === 0 && (
-                                    <tr>
-                                        <td colSpan={6} className="p-8 text-center text-gray-500 italic">No orders found.</td>
-                                    </tr>
-                                )}
                             </tbody>
                         </table>
                     </div>
@@ -763,105 +611,6 @@ const Admin: React.FC = () => {
                           </button>
                       </div>
                   </form>
-              </div>
-          </div>
-      )}
-
-      {/* 2. ORDER DETAILS MODAL */}
-      {selectedOrder && (
-          <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
-              <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto flex flex-col">
-                  {/* Header */}
-                  <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-                      <div>
-                        <h2 className="text-xl font-bold font-serif">Order #{selectedOrder.id}</h2>
-                        <p className="text-sm text-gray-500">{new Date(selectedOrder.created_at).toLocaleString()}</p>
-                      </div>
-                      <button onClick={() => setSelectedOrder(null)} className="p-2 hover:bg-gray-100 rounded-full">
-                          <X className="w-6 h-6" />
-                      </button>
-                  </div>
-
-                  {/* Body */}
-                  <div className="p-6 space-y-8 flex-1">
-                      
-                      {/* Customer Info */}
-                      <div className="grid grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg">
-                          <div>
-                              <p className="text-xs uppercase tracking-widest text-gray-500 mb-1">Customer</p>
-                              <p className="font-bold">{selectedOrder.customer_name}</p>
-                              <p className="text-sm">{selectedOrder.customer_phone}</p>
-                          </div>
-                          <div>
-                              <p className="text-xs uppercase tracking-widest text-gray-500 mb-1">Shipping Address</p>
-                              <p className="text-sm leading-relaxed">
-                                  {selectedOrder.address}<br/>
-                                  {selectedOrder.district}, {selectedOrder.canton}<br/>
-                                  {selectedOrder.province}
-                              </p>
-                          </div>
-                          <div>
-                              <p className="text-xs uppercase tracking-widest text-gray-500 mb-1">Payment</p>
-                              <p className="text-sm font-medium uppercase">{selectedOrder.payment_method.replace('_', ' ')}</p>
-                          </div>
-                          <div>
-                              <p className="text-xs uppercase tracking-widest text-gray-500 mb-1">Total</p>
-                              <p className="text-lg font-bold">₡{selectedOrder.total_amount.toLocaleString('es-CR')}</p>
-                          </div>
-                      </div>
-
-                      {/* Items List */}
-                      <div>
-                          <h3 className="text-sm uppercase tracking-widest font-bold border-b border-gray-200 pb-2 mb-4">Items Purchased</h3>
-                          <div className="space-y-4">
-                              {selectedOrder.order_items?.map((item) => (
-                                  <div key={item.id} className="flex items-center gap-4">
-                                      <div className="w-12 h-12 bg-gray-100 rounded-sm overflow-hidden flex-shrink-0">
-                                          <img 
-                                            src={item.products?.images?.[0] || `https://picsum.photos/100/100?random=${item.product_id}`} 
-                                            alt="" 
-                                            className="w-full h-full object-cover" 
-                                          />
-                                      </div>
-                                      <div className="flex-1">
-                                          <p className="font-medium text-sm">{item.products?.name || `Product #${item.product_id}`}</p>
-                                          <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                                      </div>
-                                      <div className="text-sm font-medium">
-                                          ₡{(item.price_at_purchase * item.quantity).toLocaleString('es-CR')}
-                                      </div>
-                                  </div>
-                              ))}
-                          </div>
-                      </div>
-                  </div>
-
-                  {/* Footer / Actions */}
-                  <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-500 uppercase tracking-widest">Current Status:</span>
-                          <span className="font-bold uppercase">{selectedOrder.status}</span>
-                      </div>
-                      
-                      <div className="flex gap-2">
-                          {selectedOrder.status === 'pending' && (
-                              <button 
-                                onClick={() => updateOrderStatus(selectedOrder.id, 'shipped')}
-                                className="bg-blue-600 text-white px-4 py-2 text-sm uppercase tracking-widest hover:bg-blue-700 rounded-sm flex items-center gap-2"
-                              >
-                                  <Truck className="w-4 h-4" /> Mark as Shipped
-                              </button>
-                          )}
-                           {selectedOrder.status === 'shipped' && (
-                              <button 
-                                onClick={() => updateOrderStatus(selectedOrder.id, 'delivered')}
-                                className="bg-green-600 text-white px-4 py-2 text-sm uppercase tracking-widest hover:bg-green-700 rounded-sm flex items-center gap-2"
-                              >
-                                  <CheckCircle className="w-4 h-4" /> Mark Delivered
-                              </button>
-                          )}
-                      </div>
-                  </div>
               </div>
           </div>
       )}

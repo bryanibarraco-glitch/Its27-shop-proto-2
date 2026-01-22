@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Truck, ShieldCheck, ArrowRight, ArrowLeft, ShoppingBag } from 'lucide-react';
+import { useParams, Link } from 'react-router-dom';
+import { Truck, ShieldCheck, ArrowLeft, MessageCircle } from 'lucide-react';
 import { PRODUCTS, Product } from '../data/products';
-import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabaseClient';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { addToCart } = useCart();
   const [product, setProduct] = useState<Product | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState<string>('');
@@ -43,11 +40,12 @@ const ProductDetail: React.FC = () => {
     fetchProduct();
   }, [id]);
 
-  const handleBuyNow = () => {
-    if (product) {
-      addToCart(product);
-      navigate('/checkout');
-    }
+  const handleWhatsAppOrder = () => {
+    if (!product) return;
+    const phoneNumber = "50686742604";
+    const message = `Hola, estoy interesado en el producto: ${product.name} (₡${product.price}). ¿Está disponible?`;
+    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
   };
 
   if (loading) {
@@ -62,8 +60,8 @@ const ProductDetail: React.FC = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <h1 className="text-2xl font-serif mb-4">Producto no encontrado</h1>
-        <Link to="/shop" className="text-sm uppercase tracking-widest border-b border-black pb-1 hover:opacity-50">
-          Volver a la Tienda
+        <Link to="/" className="text-sm uppercase tracking-widest border-b border-black pb-1 hover:opacity-50">
+          Volver al Catálogo
         </Link>
       </div>
     );
@@ -82,8 +80,8 @@ const ProductDetail: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 md:py-20 animate-fade-in-up">
       <div className="mb-8">
-        <Link to="/shop" className="inline-flex items-center gap-2 text-gray-500 hover:text-black transition-colors text-xs uppercase tracking-widest">
-            <ArrowLeft className="w-4 h-4" /> Volver a la Colección
+        <Link to="/" className="inline-flex items-center gap-2 text-gray-500 hover:text-black transition-colors text-xs uppercase tracking-widest">
+            <ArrowLeft className="w-4 h-4" /> Volver al Catálogo
         </Link>
       </div>
 
@@ -132,26 +130,22 @@ const ProductDetail: React.FC = () => {
              {product.description || "Elaborada a mano con precisión, esta pieza encarna la esencia de Its27. Hecha de plata esterlina 100% reciclada, presenta una textura única que atrapa la luz maravillosamente. Perfecta para el uso diario o ocasiones especiales."}
            </p>
 
-           <div className="pt-6 space-y-4">
+           <div className="pt-6">
                 <button 
-                  onClick={() => addToCart(product)}
-                  className="w-full bg-black text-white py-4 uppercase tracking-[0.2em] hover:bg-gray-800 active:scale-[0.99] transition-all flex items-center justify-center gap-3"
+                  onClick={handleWhatsAppOrder}
+                  className="w-full bg-[#25D366] text-white py-4 uppercase tracking-[0.2em] hover:bg-[#20bd5a] active:scale-[0.99] transition-all flex items-center justify-center gap-3 font-bold"
                 >
-                    Agregar al Carrito <ArrowRight className="w-4 h-4" />
+                    <MessageCircle className="w-5 h-5" /> Ordenar por WhatsApp
                 </button>
-
-                <button 
-                  onClick={handleBuyNow}
-                  className="w-full border border-black bg-white text-black py-4 uppercase tracking-[0.2em] hover:bg-gray-50 active:scale-[0.99] transition-all flex items-center justify-center gap-3"
-                >
-                    Comprar Ahora <ShoppingBag className="w-4 h-4" />
-                </button>
+                <p className="text-xs text-center text-gray-500 mt-3">
+                  Serás redirigido a WhatsApp para completar tu orden.
+                </p>
            </div>
            
            <div className="pt-8 border-t border-gray-100 grid grid-cols-2 gap-4">
               <div className="flex items-center gap-3 text-sm text-gray-500">
                   <Truck className="w-5 h-5 text-black" />
-                  <span>Envío gratis en órdenes de 5 o más artículos</span>
+                  <span>Envíos a todo el país</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-500">
                   <ShieldCheck className="w-5 h-5 text-black" />

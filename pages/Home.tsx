@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Edit3, X, Save, Upload, Loader2, Check } from 'lucide-react';
+import { ArrowRight, Star, Edit3, X, Save, Upload, Loader2, Check, SlidersHorizontal, ChevronDown, Search } from 'lucide-react';
 import { PRODUCTS, Product } from '../data/products';
 import { supabase } from '../lib/supabaseClient';
 
@@ -9,9 +9,11 @@ const DEFAULT_HERO = {
   title: "Elegancia Atemporal",
   subtitle: "Nueva Colección 2024",
   description: "Descubre la belleza de la simplicidad artesanal. Diseñado para la musa moderna.",
-  buttonText: "Ver Colección",
+  buttonText: "Ver Catálogo",
   imageUrl: "https://picsum.photos/1920/1080?grayscale&blur=2"
 };
+
+const CATEGORIES = ['Todo', 'Collar', 'Anillo', 'Aretes', 'Conjunto'];
 
 const Home: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -21,23 +23,23 @@ const Home: React.FC = () => {
 
   // Content State
   const [heroConfig, setHeroConfig] = useState(DEFAULT_HERO);
-  const [featuredIds, setFeaturedIds] = useState<number[]>([]);
   const [logoUrl, setLogoUrl] = useState('');
   
-  // Display Data
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [allProducts, setAllProducts] = useState<Product[]>([]); // For selection in modal
+  // Product Data
+  const [dbProducts, setDbProducts] = useState<Product[]>([]);
+  
+  // Filter States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Todo');
+  const [sortOption, setSortOption] = useState('featured');
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
 
   // 1. Check Auth & Load Settings
   useEffect(() => {
     checkUser();
     fetchSiteSettings();
+    fetchProducts();
   }, []);
-
-  // 2. Fetch curated products whenever IDs change
-  useEffect(() => {
-    fetchFeaturedProducts();
-  }, [featuredIds]);
 
   const checkUser = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -55,9 +57,6 @@ const Home: React.FC = () => {
 
       if (homeSettings && homeSettings.content) {
         setHeroConfig({ ...DEFAULT_HERO, ...homeSettings.content.hero });
-        setFeaturedIds(homeSettings.content.featuredIds || []);
-      } else {
-        setFeaturedIds([1, 2, 3]); 
       }
 
       // Fetch Global Config (Logo)
@@ -70,34 +69,52 @@ const Home: React.FC = () => {
       if (globalSettings && globalSettings.content && globalSettings.content.logoUrl) {
           setLogoUrl(globalSettings.content.logoUrl);
       }
-
-      // Fetch All Products (for the admin selector)
-      const { data: products } = await supabase.from('products').select('*');
-      if (products) setAllProducts(products);
-
     } catch (err) {
       console.error("Error loading settings:", err);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase.from('products').select('*');
+      if (data && data.length > 0) {
+          setDbProducts(data);
+      } else {
+          setDbProducts(PRODUCTS);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setDbProducts(PRODUCTS);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchFeaturedProducts = async () => {
-    if (featuredIds.length === 0) {
-        setFeaturedProducts(PRODUCTS.slice(0, 3)); 
-        return;
+  // Filter and Sort Logic
+  const filteredProducts = useMemo(() => {
+    let result = [...dbProducts];
+
+    // 1. Search Filter
+    if (searchQuery) {
+      result = result.filter(product => 
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     }
 
-    const { data } = await supabase
-      .from('products')
-      .select('*')
-      .in('id', featuredIds);
-    
-    if (data) {
-        const sorted = featuredIds.map(id => data.find(p => p.id === id)).filter(Boolean) as Product[];
-        setFeaturedProducts(sorted);
+    // 2. Category Filter
+    if (selectedCategory !== 'Todo') {
+      result = result.filter(product => product.category === selectedCategory);
     }
-  };
+
+    // 3. Sorting
+    if (sortOption === 'price-asc') {
+      result.sort((a, b) => a.price - b.price);
+    } else if (sortOption === 'price-desc') {
+      result.sort((a, b) => b.price - a.price);
+    }
+    
+    return result;
+  }, [searchQuery, selectedCategory, sortOption, dbProducts]);
 
   const handleSaveSettings = async () => {
     setSaving(true);
@@ -105,7 +122,6 @@ const Home: React.FC = () => {
     // 1. Save Home Config
     const homePayload = {
         hero: heroConfig,
-        featuredIds: featuredIds
     };
     const { error: homeError } = await supabase
         .from('site_settings')
@@ -124,7 +140,6 @@ const Home: React.FC = () => {
         alert("Failed to save changes. Please try again.");
     } else {
         setIsEditModalOpen(false);
-        fetchFeaturedProducts();
     }
   };
 
@@ -159,18 +174,11 @@ const Home: React.FC = () => {
     setSaving(false);
   };
 
-  const toggleFeaturedProduct = (id: number) => {
-      setFeaturedIds(prev => {
-          if (prev.includes(id)) {
-              return prev.filter(pid => pid !== id);
-          } else {
-              if (prev.length >= 3) {
-                  alert("You can only select 3 featured products. Deselect one first.");
-                  return prev;
-              }
-              return [...prev, id];
-          }
-      });
+  const scrollToCatalog = () => {
+      const catalogSection = document.getElementById('catalog');
+      if(catalogSection) {
+          catalogSection.scrollIntoView({ behavior: 'smooth' });
+      }
   };
 
   return (
@@ -208,34 +216,123 @@ const Home: React.FC = () => {
           </p>
           
           <div className="pt-8">
-            <Link 
-              to="/shop" 
+            <button 
+              onClick={scrollToCatalog}
               className="inline-flex items-center gap-3 bg-white text-black px-8 py-4 text-sm uppercase tracking-widest hover:bg-gray-200 transition-all transform hover:scale-105 duration-300"
             >
               {heroConfig.buttonText} <ArrowRight className="w-4 h-4" />
-            </Link>
+            </button>
           </div>
         </div>
       </section>
 
-      {/* Featured Preview Section */}
-      <section className="py-24 px-4 bg-white">
+      {/* CATALOG SECTION */}
+      <section id="catalog" className="py-24 px-4 bg-white min-h-screen">
         <div className="max-w-7xl mx-auto">
+          
           <div className="text-center mb-16">
-             <h3 className="text-3xl font-serif font-bold mb-4">Favoritos</h3>
+             <h3 className="text-4xl font-serif font-bold mb-4">Catálogo Completo</h3>
              <div className="w-16 h-0.5 bg-black mx-auto"></div>
           </div>
+
+           {/* Controls Section */}
+            <div className="mb-12 space-y-6">
+                
+                {/* Search Bar */}
+                <div className="max-w-md mx-auto relative group">
+                <input 
+                    type="text" 
+                    placeholder="Buscar joyería..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 bg-transparent border-b border-gray-300 focus:border-black focus:outline-none transition-colors placeholder-gray-400"
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-black transition-colors" />
+                {searchQuery && (
+                    <button 
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full"
+                    >
+                        <X className="w-4 h-4 text-gray-500" />
+                    </button>
+                )}
+                </div>
+
+                {/* Filters & Sort Toolbar */}
+                <div className="flex justify-between items-center border-t border-b border-gray-100 py-4">
+                    
+                    {/* Filter Toggle Button */}
+                    <button 
+                        onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
+                        className="flex items-center gap-2 text-sm uppercase tracking-widest hover:text-gray-600 transition-colors"
+                    >
+                        <SlidersHorizontal className="w-4 h-4" />
+                        <span>Filtros</span>
+                        {selectedCategory !== 'Todo' && (
+                            <span className="flex items-center justify-center w-5 h-5 bg-black text-white text-[10px] rounded-full">1</span>
+                        )}
+                    </button>
+
+                    {/* Sort Dropdown */}
+                    <div className="relative">
+                        <div className="flex items-center gap-2">
+                            <select 
+                                value={sortOption}
+                                onChange={(e) => setSortOption(e.target.value)}
+                                className="appearance-none bg-transparent py-2 pl-2 pr-8 text-sm uppercase tracking-widest focus:outline-none cursor-pointer text-right"
+                            >
+                                <option value="featured">Ordenar: Destacados</option>
+                                <option value="price-desc">Precio: Mayor a Menor</option>
+                                <option value="price-asc">Precio: Menor a Mayor</option>
+                            </select>
+                            <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Expandable Filter Panel */}
+                {isFilterMenuOpen && (
+                    <div className="py-8 bg-gray-50/50 px-4 rounded-lg animate-fade-in-up">
+                        <div className="flex justify-between items-end mb-4">
+                            <p className="text-xs uppercase tracking-widest text-gray-400">Categoría</p>
+                            {selectedCategory !== 'Todo' && (
+                                <button 
+                                    onClick={() => setSelectedCategory('Todo')} 
+                                    className="text-xs uppercase tracking-widest text-red-500 border-b border-red-500 pb-0.5"
+                                >
+                                    Restablecer
+                                </button>
+                            )}
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                            {CATEGORIES.map(category => (
+                                <button
+                                    key={category}
+                                    onClick={() => setSelectedCategory(category)}
+                                    className={`px-6 py-3 text-sm uppercase tracking-widest transition-all duration-300 border ${
+                                        selectedCategory === category
+                                        ? 'bg-black text-white border-black'
+                                        : 'bg-white text-gray-500 border-gray-200 hover:border-black hover:text-black'
+                                    }`}
+                                >
+                                    {category}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
             {loading ? (
-                [1,2,3].map(i => (
+                [1,2,3,4].map(i => (
                     <div key={i} className="animate-pulse space-y-4">
                         <div className="bg-gray-200 aspect-[3/4] w-full"></div>
                         <div className="h-4 bg-gray-200 w-3/4 mx-auto"></div>
                     </div>
                 ))
-            ) : (
-                featuredProducts.map((product) => {
+            ) : filteredProducts.length > 0 ? (
+                filteredProducts.map((product) => {
                     const displayImage = product.images && product.images.length > 0 
                         ? product.images[0] 
                         : `https://picsum.photos/600/800?random=${product.imageId}`;
@@ -252,25 +349,29 @@ const Home: React.FC = () => {
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                                 <div className="absolute bottom-4 left-4 right-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                                     <button className="w-full bg-white text-black py-3 text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
-                                    Vista Rápida
+                                    Ver Detalles
                                     </button>
                                 </div>
                                 </div>
                             </Link>
                             <div className="text-center space-y-1">
-                            <h4 className="text-lg font-serif">{product.name}</h4>
-                            <p className="text-gray-500 font-light">
+                            <h4 className="text-sm md:text-base font-serif font-bold">{product.name}</h4>
+                            <p className="text-gray-500 font-light text-sm">
                                 {product.price.toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 })}
                             </p>
                             </div>
                         </div>
                     );
                 })
-            )}
-            
-            {featuredProducts.length === 0 && (
-                <div className="col-span-3 text-center text-gray-400 py-10">
-                    No hay productos seleccionados.
+            ) : (
+                <div className="col-span-full text-center py-20">
+                    <p className="text-xl text-gray-400 font-serif italic">No se encontraron productos.</p>
+                    <button 
+                        onClick={() => {setSearchQuery(''); setSelectedCategory('Todo');}}
+                        className="mt-4 text-sm uppercase tracking-widest border-b border-black pb-0.5 hover:text-gray-600 hover:border-gray-600"
+                    >
+                        Limpiar Filtros
+                    </button>
                 </div>
             )}
           </div>
@@ -309,8 +410,7 @@ const Home: React.FC = () => {
          <div className="max-w-7xl mx-auto flex flex-col items-center space-y-8">
             <h2 className="text-3xl font-serif font-bold tracking-widest">ITS27</h2>
             <nav className="flex flex-wrap justify-center gap-8 text-sm text-gray-400 uppercase tracking-widest">
-              <Link to="/" className="hover:text-white transition-colors">Inicio</Link>
-              <Link to="/shop" className="hover:text-white transition-colors">Tienda</Link>
+              <Link to="/" className="hover:text-white transition-colors">Catálogo</Link>
               <Link to="/about" className="hover:text-white transition-colors">Nosotros</Link>
               <Link to="/contact" className="hover:text-white transition-colors">Contacto</Link>
             </nav>
@@ -425,38 +525,6 @@ const Home: React.FC = () => {
                                   />
                               </div>
                               <p className="text-[10px] text-gray-400">Recomendado: 1920x1080px (Landscape)</p>
-                          </div>
-                      </div>
-
-                      {/* Section: Featured */}
-                      <div className="space-y-4">
-                          <div className="flex justify-between items-center border-b pb-2">
-                            <h3 className="text-xs uppercase tracking-widest text-gray-400 font-bold">Favoritos</h3>
-                            <span className="text-xs font-bold">{featuredIds.length} / 3 Seleccionados</span>
-                          </div>
-
-                          <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                              {allProducts.map(p => {
-                                  const isSelected = featuredIds.includes(p.id);
-                                  return (
-                                      <div 
-                                        key={p.id} 
-                                        onClick={() => toggleFeaturedProduct(p.id)}
-                                        className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors border ${isSelected ? 'border-black bg-gray-50' : 'border-transparent hover:bg-gray-50'}`}
-                                      >
-                                          <div className={`w-4 h-4 rounded-sm border flex items-center justify-center ${isSelected ? 'bg-black border-black text-white' : 'border-gray-300'}`}>
-                                              {isSelected && <Check className="w-3 h-3" />}
-                                          </div>
-                                          <div className="w-10 h-10 bg-gray-200 rounded-sm overflow-hidden flex-shrink-0">
-                                              <img src={p.images?.[0] || `https://picsum.photos/100?random=${p.imageId}`} className="w-full h-full object-cover" />
-                                          </div>
-                                          <div className="flex-1 min-w-0">
-                                              <p className="text-sm font-medium truncate">{p.name}</p>
-                                              <p className="text-xs text-gray-500">₡{p.price}</p>
-                                          </div>
-                                      </div>
-                                  );
-                              })}
                           </div>
                       </div>
 

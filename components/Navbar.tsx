@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, ShoppingBag, Search } from 'lucide-react';
-import { useCart } from '../context/CartContext';
+import { Menu, Search } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
 interface NavbarProps {
@@ -9,7 +8,6 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
-  const { cartCount } = useCart();
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -83,19 +81,10 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
             </Link>
           </div>
 
-          {/* Right: Cart & Search */}
+          {/* Right: Spacer to balance layout (or Search) */}
           <div className="flex items-center space-x-2">
-             <button className="p-2 hover:bg-gray-50 rounded-full transition-colors hidden sm:block">
-              <Search className="w-5 h-5 stroke-black" />
-            </button>
-            <Link to="/cart" className="p-2 hover:bg-gray-50 rounded-full transition-colors relative">
-              <ShoppingBag className="w-6 h-6 stroke-black" />
-              {cartCount > 0 && (
-                <span className="absolute top-1 right-1 bg-black text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full animate-fade-in">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
+             {/* Hidden search for now, acting as spacer */}
+             <div className="w-10"></div>
           </div>
         </div>
       </div>
