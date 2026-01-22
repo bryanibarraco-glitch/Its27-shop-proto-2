@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Trash2, Edit2, LogOut, Save, X, Upload, Loader2, Star, ChevronLeft, ChevronRight, MessageSquare, Mail } from 'lucide-react';
+import { Package, Plus, Trash2, Edit2, LogOut, Save, X, Upload, Loader2, Star, ChevronLeft, ChevronRight, MessageSquare, Mail, Tag, Check, XCircle } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { Product } from '../data/products';
 
@@ -12,12 +12,14 @@ interface ContactMessage {
   status?: string;
 }
 
+const DEFAULT_CATEGORIES = ['Anillo', 'Collar', 'Aretes', 'Conjunto'];
+
 const Admin: React.FC = () => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
   // Dashboard State
-  const [activeTab, setActiveTab] = useState<'products' | 'messages'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'messages' | 'categories'>('products');
   
   // Product State
   const [products, setProducts] = useState<Product[]>([]);
@@ -25,6 +27,11 @@ const Admin: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
   
+  // Categories State
+  const [categoryList, setCategoryList] = useState<string[]>(DEFAULT_CATEGORIES);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [editingCategory, setEditingCategory] = useState<{ original: string, current: string } | null>(null);
+
   // Messages State
   const [messages, setMessages] = useState<ContactMessage[]>([]);
 
@@ -51,6 +58,7 @@ const Admin: React.FC = () => {
       if (session) {
           fetchProducts();
           fetchMessages();
+          fetchCategories();
       }
       setLoading(false);
     });
@@ -62,6 +70,7 @@ const Admin: React.FC = () => {
       if (session) {
           fetchProducts();
           fetchMessages();
+          fetchCategories();
       }
     });
 
@@ -77,6 +86,17 @@ const Admin: React.FC = () => {
     
     if (error) console.error('Error fetching products:', error);
     else setProducts(data || []);
+  };
+
+  const fetchCategories = async () => {
+      try {
+        const { data } = await supabase.from('site_settings').select('content').eq('key', 'categories_list').single();
+        if (data?.content?.list) {
+            setCategoryList(data.content.list);
+        }
+      } catch (error) {
+          console.error("Error fetching categories:", error);
+      }
   };
 
   const fetchMessages = async () => {
@@ -119,6 +139,9 @@ const Admin: React.FC = () => {
 
   // 4. Product CRUD
   const handleOpenProductModal = (product?: Product) => {
+    // Ensure we have a valid category default if the list changed
+    const defaultCategory = categoryList.length > 0 ? categoryList[0] : 'General';
+
     if (product) {
       setFormData({
           ...product,
@@ -129,7 +152,7 @@ const Admin: React.FC = () => {
     } else {
       setFormData({
         name: '',
-        category: 'Anillo',
+        category: defaultCategory,
         price: 0,
         imageId: Math.floor(Math.random() * 100) + 100, 
         images: [],
@@ -193,7 +216,70 @@ const Admin: React.FC = () => {
     }
   };
 
-  // 5. Image Handling
+  // 5. Category Management
+  const saveCategoriesToDb = async (list: string[]) => {
+      setCategoryList(list);
+      const { error } = await supabase.from('site_settings').upsert({ key: 'categories_list', content: { list } });
+      if(error) console.error("Error saving categories:", error);
+  };
+
+  const handleAddCategory = async () => {
+      if(!newCategoryName.trim()) return;
+      const formattedName = newCategoryName.trim();
+      if(categoryList.includes(formattedName)) {
+          alert("Category already exists");
+          return;
+      }
+      const newList = [...categoryList, formattedName];
+      await saveCategoriesToDb(newList);
+      setNewCategoryName('');
+  };
+
+  const handleDeleteCategory = async (cat: string) => {
+      if(!confirm(`Are you sure you want to delete "${cat}"? Products with this category will remain but the category will disappear from filters.`)) return;
+      const newList = categoryList.filter(c => c !== cat);
+      await saveCategoriesToDb(newList);
+  };
+
+  const startEditingCategory = (cat: string) => {
+      setEditingCategory({ original: cat, current: cat });
+  };
+
+  const saveEditedCategory = async () => {
+      if(!editingCategory || !editingCategory.current.trim()) return;
+      
+      const { original, current } = editingCategory;
+      const formattedNew = current.trim();
+      
+      if(original === formattedNew) {
+          setEditingCategory(null);
+          return;
+      }
+
+      setLoading(true);
+      try {
+          // 1. Update the list
+          const newList = categoryList.map(c => c === original ? formattedNew : c);
+          await saveCategoriesToDb(newList);
+
+          // 2. Update all matching products in the DB
+          const { error } = await supabase
+            .from('products')
+            .update({ category: formattedNew })
+            .eq('category', original);
+
+          if(error) throw error;
+          
+          await fetchProducts(); // Refresh product list
+      } catch (err: any) {
+          alert("Error renaming category: " + err.message);
+      } finally {
+          setEditingCategory(null);
+          setLoading(false);
+      }
+  };
+
+  // 6. Image Handling
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     
@@ -336,7 +422,7 @@ const Admin: React.FC = () => {
         </div>
         
         {/* Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-4">
                 <div className="p-3 bg-black/5 rounded-full">
                     <Package className="w-6 h-6 text-black" />
@@ -344,6 +430,15 @@ const Admin: React.FC = () => {
                 <div>
                     <p className="text-sm text-gray-500 uppercase tracking-wide">Products</p>
                     <p className="text-2xl font-bold">{products.length}</p>
+                </div>
+            </div>
+            <div className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-4">
+                <div className="p-3 bg-black/5 rounded-full">
+                    <Tag className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500 uppercase tracking-wide">Categories</p>
+                    <p className="text-2xl font-bold">{categoryList.length}</p>
                 </div>
             </div>
             <div className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-4">
@@ -358,16 +453,22 @@ const Admin: React.FC = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="mb-6 flex gap-6 border-b border-gray-200">
+        <div className="mb-6 flex gap-6 border-b border-gray-200 overflow-x-auto">
              <button 
                 onClick={() => setActiveTab('products')}
-                className={`pb-4 text-sm uppercase tracking-widest font-bold transition-colors ${activeTab === 'products' ? 'border-b-2 border-black text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`pb-4 text-sm uppercase tracking-widest font-bold transition-colors whitespace-nowrap ${activeTab === 'products' ? 'border-b-2 border-black text-black' : 'text-gray-400 hover:text-gray-600'}`}
              >
                  Products
              </button>
              <button 
+                onClick={() => setActiveTab('categories')}
+                className={`pb-4 text-sm uppercase tracking-widest font-bold transition-colors whitespace-nowrap ${activeTab === 'categories' ? 'border-b-2 border-black text-black' : 'text-gray-400 hover:text-gray-600'}`}
+             >
+                 Categories
+             </button>
+             <button 
                 onClick={() => setActiveTab('messages')}
-                className={`pb-4 text-sm uppercase tracking-widest font-bold transition-colors flex items-center gap-2 ${activeTab === 'messages' ? 'border-b-2 border-black text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`pb-4 text-sm uppercase tracking-widest font-bold transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === 'messages' ? 'border-b-2 border-black text-black' : 'text-gray-400 hover:text-gray-600'}`}
              >
                  Messages {messages.length > 0 && <span className="bg-gray-100 text-black px-1.5 rounded-full text-[10px]">{messages.length}</span>}
              </button>
@@ -443,6 +544,79 @@ const Admin: React.FC = () => {
                                 })}
                             </tbody>
                         </table>
+                    </div>
+                </>
+            )}
+
+            {/* CATEGORIES TAB */}
+            {activeTab === 'categories' && (
+                <>
+                    <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <h2 className="text-xl font-bold font-serif">Category Management</h2>
+                        <div className="flex gap-2 w-full md:w-auto">
+                            <input 
+                                type="text" 
+                                value={newCategoryName}
+                                onChange={(e) => setNewCategoryName(e.target.value)}
+                                placeholder="New Category Name"
+                                className="border border-gray-300 px-3 py-2 text-sm rounded-sm focus:outline-none focus:border-black flex-1"
+                            />
+                            <button 
+                                onClick={handleAddCategory}
+                                className="bg-black text-white px-4 py-2 text-xs uppercase tracking-widest hover:bg-gray-800 transition-colors"
+                            >
+                                Add
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {categoryList.map((category) => (
+                                <div key={category} className="border border-gray-200 p-4 rounded-lg flex items-center justify-between group hover:border-black transition-colors bg-gray-50">
+                                    {editingCategory?.original === category ? (
+                                        <div className="flex items-center gap-2 w-full">
+                                            <input 
+                                                type="text" 
+                                                value={editingCategory.current}
+                                                onChange={(e) => setEditingCategory({...editingCategory, current: e.target.value})}
+                                                className="flex-1 bg-white border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:border-black"
+                                                autoFocus
+                                            />
+                                            <button onClick={saveEditedCategory} className="text-green-600 hover:bg-green-50 p-1 rounded">
+                                                <Check className="w-4 h-4" />
+                                            </button>
+                                            <button onClick={() => setEditingCategory(null)} className="text-red-500 hover:bg-red-50 p-1 rounded">
+                                                <XCircle className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <span className="font-medium">{category}</span>
+                                            <div className="flex items-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button 
+                                                    onClick={() => startEditingCategory(category)}
+                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
+                                                    title="Rename"
+                                                >
+                                                    <Edit2 className="w-4 h-4" />
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDeleteCategory(category)}
+                                                    className="p-2 text-red-600 hover:bg-red-50 rounded-full"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        <p className="mt-8 text-xs text-gray-500">
+                            * Note: Renaming a category will automatically update all associated products. Deleting a category will remove it from the filter list, but products will retain the old category text until manually updated.
+                        </p>
                     </div>
                 </>
             )}
@@ -601,7 +775,7 @@ const Admin: React.FC = () => {
                                         onChange={e => setFormData({...formData, category: e.target.value})}
                                         className="w-full bg-white text-black border border-gray-300 p-3 rounded-sm focus:outline-none focus:border-black transition-colors"
                                     >
-                                        {['Anillo', 'Collar', 'Aretes', 'Conjunto'].map(c => (
+                                        {categoryList.map(c => (
                                             <option key={c} value={c}>{c}</option>
                                         ))}
                                     </select>

@@ -13,7 +13,7 @@ const DEFAULT_HERO = {
   imageUrl: "https://picsum.photos/1920/1080?grayscale&blur=2"
 };
 
-const CATEGORIES = ['Todo', 'Collar', 'Anillo', 'Aretes', 'Conjunto'];
+const DEFAULT_CATEGORIES = ['Anillo', 'Collar', 'Aretes', 'Conjunto'];
 
 const Home: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -27,6 +27,7 @@ const Home: React.FC = () => {
   
   // Product Data
   const [dbProducts, setDbProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
   
   // Filter States
   const [searchQuery, setSearchQuery] = useState('');
@@ -68,6 +69,17 @@ const Home: React.FC = () => {
       
       if (globalSettings && globalSettings.content && globalSettings.content.logoUrl) {
           setLogoUrl(globalSettings.content.logoUrl);
+      }
+
+      // Fetch Categories
+      const { data: catSettings } = await supabase
+        .from('site_settings')
+        .select('content')
+        .eq('key', 'categories_list')
+        .single();
+
+      if (catSettings?.content?.list) {
+          setCategories(catSettings.content.list);
       }
     } catch (err) {
       console.error("Error loading settings:", err);
@@ -186,6 +198,9 @@ const Home: React.FC = () => {
           catalogSection.scrollIntoView({ behavior: 'smooth' });
       }
   };
+
+  // Combine fixed 'Todo' with dynamic categories
+  const displayCategories = ['Todo', ...categories];
 
   return (
     <div className="flex flex-col min-h-screen relative">
@@ -311,7 +326,7 @@ const Home: React.FC = () => {
                             )}
                         </div>
                         <div className="flex flex-wrap gap-3">
-                            {CATEGORIES.map(category => (
+                            {displayCategories.map(category => (
                                 <button
                                     key={category}
                                     onClick={() => setSelectedCategory(category)}
