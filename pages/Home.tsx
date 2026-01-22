@@ -107,7 +107,13 @@ const Home: React.FC = () => {
     }
 
     // 3. Sorting
-    if (sortOption === 'price-asc') {
+    if (sortOption === 'featured') {
+      // Sort by is_featured desc (true first), then by ID (or random if needed, but ID is stable)
+      result.sort((a, b) => {
+        if (a.is_featured === b.is_featured) return 0;
+        return a.is_featured ? -1 : 1;
+      });
+    } else if (sortOption === 'price-asc') {
       result.sort((a, b) => a.price - b.price);
     } else if (sortOption === 'price-desc') {
       result.sort((a, b) => b.price - a.price);
@@ -346,6 +352,11 @@ const Home: React.FC = () => {
                                     alt={product.name}
                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                 />
+                                {product.is_featured && (
+                                    <div className="absolute top-2 right-2 bg-black text-white text-[10px] px-2 py-1 uppercase tracking-widest font-bold z-10">
+                                        Destacado
+                                    </div>
+                                )}
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                                 <div className="absolute bottom-4 left-4 right-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                                     <button className="w-full bg-white text-black py-3 text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-colors">

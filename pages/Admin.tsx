@@ -35,7 +35,8 @@ const Admin: React.FC = () => {
     price: 0,
     imageId: 101,
     images: [],
-    description: ''
+    description: '',
+    is_featured: false
   });
   
   // Login State
@@ -121,7 +122,8 @@ const Admin: React.FC = () => {
     if (product) {
       setFormData({
           ...product,
-          images: product.images || []
+          images: product.images || [],
+          is_featured: product.is_featured || false
       });
       setIsEditing(true);
     } else {
@@ -131,7 +133,8 @@ const Admin: React.FC = () => {
         price: 0,
         imageId: Math.floor(Math.random() * 100) + 100, 
         images: [],
-        description: ''
+        description: '',
+        is_featured: false
       });
       setIsEditing(false);
     }
@@ -148,6 +151,19 @@ const Admin: React.FC = () => {
     }
   };
 
+  const toggleFeatured = async (product: Product) => {
+      const newVal = !product.is_featured;
+      // Optimistic update
+      setProducts(products.map(p => p.id === product.id ? { ...p, is_featured: newVal } : p));
+      
+      const { error } = await supabase.from('products').update({ is_featured: newVal }).eq('id', product.id);
+      if (error) {
+          console.error("Error updating featured status:", error);
+          // Revert on error
+          fetchProducts();
+      }
+  };
+
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     const payload = {
@@ -156,7 +172,8 @@ const Admin: React.FC = () => {
         price: formData.price,
         "imageId": formData.imageId,
         description: formData.description,
-        images: formData.images
+        images: formData.images,
+        is_featured: formData.is_featured
     };
 
     if (isEditing && formData.id) {
@@ -380,6 +397,7 @@ const Admin: React.FC = () => {
                                     <th className="p-4">Name</th>
                                     <th className="p-4">Category</th>
                                     <th className="p-4">Price</th>
+                                    <th className="p-4 text-center">Featured</th>
                                     <th className="p-4 text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -401,6 +419,15 @@ const Admin: React.FC = () => {
                                                 <span className="px-2 py-1 bg-gray-100 rounded-full text-xs uppercase tracking-wide">{product.category}</span>
                                             </td>
                                             <td className="p-4 text-sm">₡{product.price.toLocaleString('es-CR')}</td>
+                                            <td className="p-4 text-center">
+                                                <button 
+                                                    onClick={() => toggleFeatured(product)}
+                                                    className={`p-2 rounded-full hover:bg-gray-100 transition-colors ${product.is_featured ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-400'}`}
+                                                    title={product.is_featured ? "Remove from Featured" : "Add to Featured"}
+                                                >
+                                                    <Star className={`w-5 h-5 ${product.is_featured ? 'fill-current' : ''}`} />
+                                                </button>
+                                            </td>
                                             <td className="p-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
                                                     <button onClick={() => handleOpenProductModal(product)} className="p-2 hover:bg-gray-100 rounded-full text-blue-600 transition-colors">
@@ -600,6 +627,18 @@ const Admin: React.FC = () => {
                                     onChange={e => setFormData({...formData, description: e.target.value})}
                                     className="w-full bg-white text-black border border-gray-300 p-3 rounded-sm focus:outline-none focus:border-black resize-none transition-colors"
                                   ></textarea>
+                              </div>
+
+                              {/* Featured Toggle in Edit Form */}
+                              <div className="flex items-center gap-3 border-t border-gray-200 pt-4">
+                                  <button 
+                                      type="button"
+                                      onClick={() => setFormData({...formData, is_featured: !formData.is_featured})}
+                                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.is_featured ? 'bg-black' : 'bg-gray-200'}`}
+                                  >
+                                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.is_featured ? 'translate-x-6' : 'translate-x-1'}`} />
+                                  </button>
+                                  <span className="text-sm font-medium">Mark as Featured Product</span>
                               </div>
                           </div>
                       </div>
