@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Package, Plus, Trash2, Edit2, LogOut, Save, X, Upload, Loader2, Star, ChevronLeft, ChevronRight, MessageSquare, Mail, Tag, Check, XCircle } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Package, Plus, Trash2, Edit2, LogOut, Save, X, Upload, Loader2, Star, ChevronLeft, ChevronRight, MessageSquare, Mail, Tag, Check, XCircle, Search, Filter, DollarSign, BarChart3 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { Product } from '../data/products';
 
@@ -26,6 +26,10 @@ const Admin: React.FC = () => {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  
+  // Inventory Filtering & Search State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterCategory, setFilterCategory] = useState('All');
   
   // Categories State
   const [categoryList, setCategoryList] = useState<string[]>(DEFAULT_CATEGORIES);
@@ -350,6 +354,26 @@ const Admin: React.FC = () => {
       });
   };
 
+  // 7. Computed Data for Inventory
+  const inventoryStats = useMemo(() => {
+    return categoryList.map(cat => {
+        const catProducts = products.filter(p => p.category === cat);
+        return {
+            name: cat,
+            count: catProducts.length,
+            value: catProducts.reduce((sum, p) => sum + p.price, 0)
+        };
+    });
+  }, [products, categoryList]);
+
+  const filteredProducts = useMemo(() => {
+      return products.filter(p => {
+          const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+          const matchesCategory = filterCategory === 'All' || p.category === filterCategory;
+          return matchesSearch && matchesCategory;
+      });
+  }, [products, searchTerm, filterCategory]);
+
   // --- RENDER: LOADING ---
   if (loading && !session) {
     return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div></div>;
@@ -480,11 +504,61 @@ const Admin: React.FC = () => {
             {/* PRODUCTS TAB */}
             {activeTab === 'products' && (
                 <>
-                    <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                        <h2 className="text-xl font-bold font-serif">Inventory</h2>
+                    {/* Inventory Summary Dashboard */}
+                    <div className="p-6 bg-gray-50/50 border-b border-gray-100">
+                        <div className="flex items-center gap-2 mb-4">
+                            <BarChart3 className="w-5 h-5 text-gray-500" />
+                            <h3 className="text-sm uppercase tracking-widest font-bold text-gray-700">Inventory Summary</h3>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                             {inventoryStats.map((stat) => (
+                                 <div key={stat.name} className="bg-white p-4 rounded border border-gray-100 shadow-sm">
+                                     <p className="text-xs uppercase text-gray-500 tracking-wide mb-1 truncate">{stat.name}</p>
+                                     <p className="text-xl font-bold mb-1">{stat.count}</p>
+                                     <p className="text-xs text-green-600 font-medium">{stat.value.toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 })}</p>
+                                 </div>
+                             ))}
+                        </div>
+                    </div>
+
+                    {/* Filter & Actions Toolbar */}
+                    <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto flex-1">
+                             {/* Search */}
+                            <div className="relative group w-full md:w-64">
+                                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black" />
+                                <input 
+                                    type="text" 
+                                    placeholder="Search products..." 
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black transition-colors"
+                                />
+                                {searchTerm && (
+                                    <button onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black">
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Category Filter */}
+                            <div className="relative w-full md:w-48">
+                                <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                <select 
+                                    value={filterCategory}
+                                    onChange={(e) => setFilterCategory(e.target.value)}
+                                    className="w-full pl-9 pr-8 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black appearance-none cursor-pointer bg-white transition-colors"
+                                >
+                                    <option value="All">All Categories</option>
+                                    {categoryList.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                                <ChevronRight className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 rotate-90 pointer-events-none" />
+                            </div>
+                        </div>
+
                         <button 
                             onClick={() => handleOpenProductModal()}
-                            className="flex items-center gap-2 bg-black text-white px-4 py-2 text-xs uppercase tracking-widest hover:bg-gray-800 transition-colors"
+                            className="flex items-center gap-2 bg-black text-white px-4 py-2 text-xs uppercase tracking-widest hover:bg-gray-800 transition-colors w-full md:w-auto justify-center"
                         >
                             <Plus className="w-4 h-4" /> Add Product
                         </button>
@@ -503,7 +577,7 @@ const Admin: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {products.map((product) => {
+                                {filteredProducts.map((product) => {
                                     const displayImage = product.images && product.images.length > 0 
                                         ? product.images[0] 
                                         : `https://picsum.photos/100/100?random=${product.imageId}`;
@@ -542,6 +616,13 @@ const Admin: React.FC = () => {
                                         </tr>
                                     );
                                 })}
+                                {filteredProducts.length === 0 && (
+                                    <tr>
+                                        <td colSpan={6} className="p-8 text-center text-gray-500 italic">
+                                            No products match your search/filter.
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
