@@ -1,9 +1,13 @@
 import React from 'react';
 
 const WhatsAppBubble: React.FC = () => {
+  const phoneNumber = "50686742604";
+  const message = "Hola, me gustaría obtener más información sobre sus joyas.";
+  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
   return (
     <a
-      href="https://wa.me/+50686742604"
+      href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-6 right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-lg hover:shadow-xl hover:bg-[#20bd5a] transition-all duration-300 hover:-translate-y-1 group flex items-center justify-center"
