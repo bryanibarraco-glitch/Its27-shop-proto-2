@@ -18,6 +18,20 @@
               black: '#000000',
               white: '#ffffff',
               offwhite: '#f9f9f9',
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-out',
+              'fade-in-up': 'fadeInUp 0.8s ease-out',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
             }
           }
         }
@@ -26,9 +40,20 @@
     <style>
       body {
         font-family: 'Lato', sans-serif;
+        scroll-behavior: smooth;
+        -webkit-tap-highlight-color: transparent; /* Removes the blue highlight on mobile tap */
       }
       h1, h2, h3, h4, h5, h6 {
         font-family: 'Playfair Display', serif;
+      }
+      
+      /* Luxury Scroll: Hide scrollbars but keep functionality */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
       }
     </style>
   <script type="importmap">

@@ -87,19 +87,37 @@ const ProductDetail: React.FC = () => {
       ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 md:py-20 animate-fade-in-up">
-      <div className="mb-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 md:py-20 animate-fade-in-up">
+      <div className="mb-4 md:mb-8">
         <Link to="/" className="inline-flex items-center gap-2 text-gray-500 hover:text-black transition-colors text-xs uppercase tracking-widest">
             <ArrowLeft className="w-4 h-4" /> Volver al Catálogo
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-20">
         
         {/* Product Image Gallery */}
         <div className="space-y-4">
-            {/* Main Image */}
-            <div className="bg-gray-50 aspect-[3/4] overflow-hidden relative">
+            
+            {/* MOBILE: Horizontal Scroll Snap Carousel (Luxury App Feel) */}
+            <div className="md:hidden w-full overflow-x-auto flex snap-x snap-mandatory gap-4 no-scrollbar pb-4">
+                {images && images.map((img, idx) => (
+                    <div key={idx} className="snap-center shrink-0 w-[85vw] aspect-[3/4] bg-gray-50 overflow-hidden relative rounded-sm">
+                         <img 
+                            src={img} 
+                            alt={`${product.name} - view ${idx + 1}`}
+                            className="w-full h-full object-cover" 
+                        />
+                         {/* Simple indicator overlay for mobile */}
+                        <div className="absolute bottom-4 right-4 bg-black/50 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm">
+                            {idx + 1} / {images.length}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* DESKTOP: Traditional Gallery */}
+            <div className="hidden md:block bg-gray-50 aspect-[3/4] overflow-hidden relative">
                 <img 
                     src={activeImage} 
                     alt={product.name}
@@ -107,20 +125,18 @@ const ProductDetail: React.FC = () => {
                 />
             </div>
             
-            {/* Thumbnails */}
-            {images && images.length > 1 && (
-                <div className="grid grid-cols-4 gap-4">
-                    {images.map((img, idx) => (
-                        <div 
-                            key={idx} 
-                            onClick={() => setActiveImage(img!)}
-                            className={`aspect-square overflow-hidden cursor-pointer border-2 transition-all ${activeImage === img ? 'border-black opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
-                        >
-                            <img src={img} className="w-full h-full object-cover" alt={`Detail ${idx + 1}`} />
-                        </div>
-                    ))}
-                </div>
-            )}
+            {/* Desktop Thumbnails */}
+            <div className="hidden md:grid grid-cols-4 gap-4">
+                {images && images.map((img, idx) => (
+                    <div 
+                        key={idx} 
+                        onClick={() => setActiveImage(img!)}
+                        className={`aspect-square overflow-hidden cursor-pointer border-2 transition-all ${activeImage === img ? 'border-black opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                    >
+                        <img src={img} className="w-full h-full object-cover" alt={`Detail ${idx + 1}`} />
+                    </div>
+                ))}
+            </div>
         </div>
 
         {/* Product Info */}
@@ -142,7 +158,7 @@ const ProductDetail: React.FC = () => {
            <div className="pt-6">
                 <button 
                   onClick={handleWhatsAppOrder}
-                  className="w-full bg-[#25D366] text-white py-4 uppercase tracking-[0.2em] hover:bg-[#20bd5a] active:scale-[0.99] transition-all flex items-center justify-center gap-3 font-bold"
+                  className="w-full bg-[#25D366] text-white py-4 uppercase tracking-[0.2em] hover:bg-[#20bd5a] active:scale-[0.99] transition-all flex items-center justify-center gap-3 font-bold shadow-md md:shadow-none"
                 >
                     <MessageCircle className="w-5 h-5" /> Ordenar por WhatsApp
                 </button>

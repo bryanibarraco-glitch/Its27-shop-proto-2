@@ -239,7 +239,7 @@ const Home: React.FC = () => {
           <div className="pt-8">
             <button 
               onClick={scrollToCatalog}
-              className="inline-flex items-center gap-3 bg-white text-black px-8 py-4 text-sm uppercase tracking-widest hover:bg-gray-200 transition-all transform hover:scale-105 duration-300"
+              className="inline-flex items-center gap-3 bg-white text-black px-8 py-4 text-sm uppercase tracking-widest hover:bg-gray-200 transition-all transform hover:scale-105 duration-300 active:scale-95"
             >
               {heroConfig.buttonText} <ArrowRight className="w-4 h-4" />
             </button>
@@ -361,7 +361,8 @@ const Home: React.FC = () => {
                     return (
                         <div key={product.id} className="group cursor-pointer">
                             <Link to={`/product/${product.id}`}>
-                                <div className="relative overflow-hidden aspect-[3/4] mb-4 bg-gray-100">
+                                {/* Added active:scale-95 for mobile tactile feedback */}
+                                <div className="relative overflow-hidden aspect-[3/4] mb-4 bg-gray-100 transition-transform duration-300 active:scale-[0.98]">
                                 <img 
                                     src={displayImage} 
                                     alt={product.name}
@@ -373,8 +374,10 @@ const Home: React.FC = () => {
                                     </div>
                                 )}
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-                                <div className="absolute bottom-4 left-4 right-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                                    <button className="w-full bg-white text-black py-3 text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
+                                
+                                {/* Hidden on mobile (default), block on md+. This fixes the "hover focused on PC" feel. */}
+                                <div className="hidden md:block absolute bottom-4 left-4 right-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                                    <button className="w-full bg-white text-black py-3 text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-colors shadow-lg">
                                     Ver Detalles
                                     </button>
                                 </div>

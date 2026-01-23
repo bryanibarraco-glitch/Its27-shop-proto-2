@@ -175,14 +175,16 @@ const Shop: React.FC = () => {
 
                 return (
                     <div key={product.id} className="space-y-3 group cursor-pointer">
-                    <Link to={`/product/${product.id}`} className="block aspect-[4/5] bg-gray-100 relative overflow-hidden">
+                    <Link to={`/product/${product.id}`} className="block aspect-[4/5] bg-gray-100 relative overflow-hidden transition-transform duration-200 active:scale-[0.98]">
                         <img 
                             src={displayImage} 
                             alt={product.name} 
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300"></div>
-                        <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                        
+                        {/* Desktop Only Button */}
+                        <div className="hidden md:block absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                             <button className="w-full bg-white text-black py-2 text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
                                 Ver Detalles
                             </button>
