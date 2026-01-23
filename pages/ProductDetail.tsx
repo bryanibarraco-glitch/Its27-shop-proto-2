@@ -43,7 +43,16 @@ const ProductDetail: React.FC = () => {
   const handleWhatsAppOrder = () => {
     if (!product) return;
     const phoneNumber = "50686742604";
-    const message = `Hola, estoy interesado en el producto: ${product.name} (₡${product.price}). ¿Está disponible?`;
+    
+    // Determine the base URL. If we are in a blob/preview environment, default to the production domain.
+    // Otherwise, use the current window's origin.
+    const isBlobOrLocal = window.location.protocol === 'blob:' || window.location.protocol === 'file:';
+    const origin = isBlobOrLocal ? 'https://its27jewelry.com' : window.location.origin;
+    
+    // Construct the HashRouter style URL
+    const productUrl = `${origin}/#/product/${product.id}`;
+
+    const message = `Hola, estoy interesado en el producto: ${product.name} (₡${product.price}).\nLink: ${productUrl}\n¿Está disponible?`;
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
