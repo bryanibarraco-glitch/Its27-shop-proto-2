@@ -46,6 +46,9 @@ const AppContent: React.FC = () => {
     };
   }, [isSidebarOpen]);
 
+  // Hide WhatsApp Bubble on Product Detail pages to avoid redundancy with the "Buy Now" button
+  const isProductDetailPage = location.pathname.startsWith('/product/');
+
   return (
     <div className="min-h-screen bg-white text-black selection:bg-black selection:text-white">
       {/* Navigation Layer */}
@@ -57,7 +60,7 @@ const AppContent: React.FC = () => {
         links={navigationLinks} 
       />
 
-      <WhatsAppBubble />
+      {!isProductDetailPage && <WhatsAppBubble />}
 
       {/* Main Content Layer */}
       <main className="relative">
