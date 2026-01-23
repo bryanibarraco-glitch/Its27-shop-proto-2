@@ -192,7 +192,7 @@ const Admin: React.FC = () => {
     const payload = {
         name: formData.name,
         category: formData.category,
-        price: formData.price,
+        price: formData.price || 0,
         "imageId": formData.imageId,
         description: formData.description,
         images: formData.images,
@@ -785,9 +785,13 @@ const Admin: React.FC = () => {
                                     <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Price (CRC)</label>
                                     <input 
                                         type="number" 
-                                        value={formData.price}
-                                        onChange={e => setFormData({...formData, price: Number(e.target.value)})}
-                                        className="w-full bg-white text-black border border-gray-300 p-3 rounded-sm focus:outline-none focus:border-black transition-colors"
+                                        value={formData.price ?? ''}
+                                        onChange={e => {
+                                            const val = e.target.value;
+                                            setFormData({...formData, price: val === '' ? undefined : Number(val)});
+                                        }}
+                                        className="w-full bg-white text-black border border-gray-300 p-3 rounded-sm focus:outline-none focus:border-black transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        placeholder="0"
                                         required 
                                     />
                                 </div>
