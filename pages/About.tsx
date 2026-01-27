@@ -1,34 +1,33 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 const About: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-20">
-      <h1 className="text-4xl md:text-5xl font-serif font-bold text-center mb-12">Nuestra Historia</h1>
+      <h1 className="text-4xl md:text-5xl font-serif font-bold text-center mb-12 tracking-widest">IT'S 27</h1>
       
-      <div className="space-y-8 text-lg font-light text-gray-600 leading-relaxed animate-fade-in-up">
-        <p className="text-xl text-black">
-          Fundada en 2024, <span className="font-serif font-bold">Its27 Jewelry</span> nació del deseo de eliminar lo innecesario y centrarse en lo esencial. 
+      <div className="space-y-8 text-lg font-light text-gray-600 leading-relaxed animate-fade-in-up text-center md:text-justify">
+        <p className="text-xl text-black font-medium">
+          Te damos la bienvenida a It's 27, un espacio seguro donde la creatividad y la elegancia convergen para dar vida a piezas únicas y atemporales.
         </p>
         
         <p>
-          Creemos que la joyería no solo debe adornar el cuerpo, sino resonar con el alma. Nuestra filosofía se basa en el minimalismo, no como falta de detalle, sino como la cantidad perfecta del mismo. Cada curva, borde y pulido es intencional.
+          Nuestro compromiso es ofrecerte más que simples accesorios; queremos proporcionarte la oportunidad de expresar tu estilo y personalidad a través de nuestras piezas.
         </p>
 
-        <div className="my-12 relative aspect-video bg-gray-100 overflow-hidden">
-           <img 
-            src="https://picsum.photos/1200/600?grayscale&blur=1" 
-            alt="Jewelry Workshop" 
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" 
-           />
-        </div>
-
-        <h2 className="text-2xl font-serif font-bold text-black mt-12 mb-4">El Proceso</h2>
         <p>
-          Cada pieza es hecha a mano en nuestro pequeño estudio, asegurando que no haya dos artículos exactamente iguales. Utilizamos solo plata y oro de origen ético, comprometidos con la sostenibilidad tanto como con el estilo. Desde el boceto inicial hasta el pulido final, manos humanas dan forma a cada parte del viaje.
+          Cada joya es una obra de arte que habla por sí misma, lista para ser descubierta y llevada con confianza en cualquier ocasión especial.
         </p>
         
         <p>
-          Its27 es más que una marca; es una celebración de la elegancia atemporal para la musa moderna.
+          Desde elegantes collares hasta brillantes anillos, cada artículo ha sido cuidadosamente seleccionado para reflejar tu diversidad.
+        </p>
+
+        <p>
+          Descubre la joya que resonará contigo y se convertirá en un reflejo de tu historia personal.
+        </p>
+
+        <p className="text-black font-bold pt-8 text-center font-serif text-2xl">
+          ¡Estamos aquí para ayudarte a encontrar tu próximo tesoro!
         </p>
       </div>
     </div>

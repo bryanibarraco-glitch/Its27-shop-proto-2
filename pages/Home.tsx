@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Edit3, X, Save, Upload, Loader2, Check, SlidersHorizontal, ChevronDown, Search } from 'lucide-react';
+import { ArrowRight, Star, Edit3, X, Save, Upload, Loader2, Check, SlidersHorizontal, ChevronDown, Search, Instagram } from 'lucide-react';
 import { PRODUCTS, Product } from '../data/products';
 import { supabase } from '../lib/supabaseClient';
 
@@ -414,8 +414,8 @@ const Home: React.FC = () => {
               <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4">
                 <Star className="w-6 h-6" />
               </div>
-              <h4 className="text-lg font-bold uppercase tracking-wide">Calidad Premium</h4>
-              <p className="text-gray-500 font-light">Materiales de origen ético y artesanía experta en cada pieza.</p>
+              <h4 className="text-lg font-bold uppercase tracking-wide">Materiales Auténticos</h4>
+              <p className="text-gray-500 font-light">Plata y oro genuinos, trabajados a mano con atención al detalle.</p>
             </div>
             <div className="space-y-4">
               <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4">
@@ -428,8 +428,8 @@ const Home: React.FC = () => {
               <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4">
                  <ArrowRight className="w-6 h-6 -rotate-45" />
               </div>
-              <h4 className="text-lg font-bold uppercase tracking-wide">Garantía de Por Vida</h4>
-              <p className="text-gray-500 font-light">Respaldamos nuestra joyería para siempre. Experimenta el lujo sin preocupaciones.</p>
+              <h4 className="text-lg font-bold uppercase tracking-wide">Satisfacción Garantizada</h4>
+              <p className="text-gray-500 font-light">Tu felicidad es lo primero. Si no te encanta, estamos aquí para ayudarte.</p>
             </div>
         </div>
       </section>
@@ -443,7 +443,12 @@ const Home: React.FC = () => {
               <Link to="/about" className="hover:text-white transition-colors">Nosotros</Link>
               <Link to="/contact" className="hover:text-white transition-colors">Contacto</Link>
             </nav>
-            <p className="text-xs text-gray-600 pt-8">© 2024 Its27 Jewelry. Todos los derechos reservados.</p>
+            
+            <a href="https://www.instagram.com/its27jewelry/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors" aria-label="Instagram">
+                <Instagram className="w-6 h-6" />
+            </a>
+
+            <p className="text-xs text-gray-600 pt-4">© 2024 Its27 Jewelry. Todos los derechos reservados.</p>
          </div>
       </footer>
 

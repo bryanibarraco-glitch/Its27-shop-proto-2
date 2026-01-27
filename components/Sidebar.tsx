@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { X } from 'lucide-react';
+import { X, Instagram } from 'lucide-react';
 import { NavLink } from '../types';
 
 interface SidebarProps {
@@ -59,8 +59,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, links }) => {
             </ul>
           </nav>
 
-          <div className="p-8 border-t border-gray-100">
-            <p className="text-sm text-gray-400 uppercase tracking-widest text-center">
+          <div className="p-8 border-t border-gray-100 flex flex-col gap-6">
+            <a 
+              href="https://www.instagram.com/its27jewelry/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 text-gray-600 hover:text-black transition-colors"
+            >
+              <Instagram className="w-5 h-5" />
+              <span className="text-sm uppercase tracking-widest">Síguenos</span>
+            </a>
+            <p className="text-xs text-gray-400 uppercase tracking-widest">
               Colección Joyería Its27
             </p>
           </div>
